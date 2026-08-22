@@ -110,6 +110,18 @@ export type Copy = {
   productWhy: Record<string, string>;
   /** 인물 key → 습관 설명과 한 줄 */
   idolCopy: Record<string, { habit: string; pull: string }>;
+  /** 인물 key → 그 사람의 관리 '방식' 이름과 한 줄 설명 */
+  idolMethod: Record<string, { name: string; line: string }>;
+  idolMatch: {
+    title: string;
+    note: string;
+    matchEyebrow: string;
+    methodLabel: string;
+    kitTitle: string;
+    kitNote: string;
+    alsoTitle: string;
+    alsoNote: string;
+  };
 
   share: {
     prompt: (code: string) => string;

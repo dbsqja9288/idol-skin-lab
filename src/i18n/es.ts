@@ -376,6 +376,27 @@ export const es: Copy = {
     },
   },
 
+  idolMethod: {
+    hydration: { name: "El hábito de la mascarilla fría", line: "Frecuencia por encima de intensidad: mascarilla fría casi todas las noches, tumbada, para que nunca cueste." },
+    gentle: { name: "El día de recuperación", line: "Limpieza deliberadamente suave y días sin maquillaje, para que la piel descanse entre jornadas exigentes." },
+    spf: { name: "La regla de la reaplicación", line: "El protector solar como lo único innegociable, reaplicado a lo largo del día en vez de puesto una vez y olvidado." },
+    layering: { name: "El método de las siete capas", line: "Capas finas de esencia acuosa a palmadas hasta que absorben, y después sellar: volumen de hidratación sin peso." },
+    cleansing: { name: "Primero la doble limpieza", line: "Retirar hasta el último resto del día antes de un solo paso de tratamiento. Aceite que disuelve y luego pH bajo." },
+    depuff: { name: "Frío primero, minimalismo después", line: "Agua helada antes que nada, y una rutina corta repetida exactamente, en vez de una larga hecha a ratos." },
+  },
+
+  idolMatch: {
+    title: "Tu match entre las idols",
+    note: "El match es por método, no por su cara: esta es la forma de trabajar que encaja con cómo se comporta tu piel. Los hábitos están descritos a partir de entrevistas publicadas.",
+    matchEyebrow: "La más cercana a tu tipo",
+    methodLabel: "El método",
+    kitTitle: "Tres productos que aplican este método en tu piel",
+    kitNote:
+      "Son nuestra selección para tus cuatro letras, no la suya: lo que tomas prestado es el método. Del mismo estante de arriba, usados con este enfoque.",
+    alsoTitle: "Dos hábitos más que vale la pena copiar",
+    alsoNote: "También relevantes para tu tipo. Solo el método.",
+  },
+
   share: {
     prompt: (code) => `Eres ${code}. Publícalo — tus amigas van a querer saber el suyo.`,
     text: (code, name) =>

@@ -119,25 +119,7 @@ export default function ReportView({
             </div>
             <div className="prods">
               {items.map((p) => (
-                <article className="prod" key={p.key}>
-                  <div className="bottle" style={{ background: `linear-gradient(160deg, ${p.c[0]}, ${p.c[1]})` }}>
-                    <b>{p.brand}</b>
-                  </div>
-                  <div className="info">
-                    <p className="reason">{p.reason}</p>
-                    <p className="brand">{p.brand}</p>
-                    <p className="name">{p.name}</p>
-                    <p className="why">{p.why}</p>
-                    <p className="price">{p.price}</p>
-                  </div>
-                  <div className="shop">
-                    {stores.map((k) => (
-                      <a key={k} href={linkFor(p, k)} target="_blank" rel="nofollow sponsored noopener">
-                        {storeLabel(k)}
-                      </a>
-                    ))}
-                  </div>
-                </article>
+                <ProductCard key={p.key} p={p} stores={stores} />
               ))}
             </div>
           </div>
@@ -148,24 +130,61 @@ export default function ReportView({
 
       <section className="sec">
         <div className="sec-head">
-          <h2>{s.idolsTitle}</h2>
-          <p>{s.idolsNote}</p>
+          <h2>{c.idolMatch.title}</h2>
+          <p>{c.idolMatch.note}</p>
         </div>
-        <div className="idols">
-          {report.idols.map((d, i) => (
-            <article className="idol" key={d.key}>
-              <div className="ava" style={{ background: ["var(--glow-a)", "var(--glow-b)", "var(--glow-c)"][i] }}>
-                {d.i}
-              </div>
-              <div>
-                <h3>{d.n}</h3>
-                <p className="grp">{d.g}</p>
-                <p className="habit">{d.habit}</p>
-                <p className="pull">{d.pull}</p>
-              </div>
-            </article>
+
+        <article className="match">
+          <div className="match-top">
+            <div className="ava" style={{ background: "var(--glow-a)" }}>{report.match.idol.i}</div>
+            <div>
+              <p className="eyebrow">{c.idolMatch.matchEyebrow}</p>
+              <h3>{report.match.idol.n}</h3>
+              <p className="grp">{report.match.idol.g}</p>
+            </div>
+          </div>
+          <div className="method">
+            <p className="method-label">{c.idolMatch.methodLabel}</p>
+            <p className="method-name">{report.match.idol.method.name}</p>
+            <p className="method-line">{report.match.idol.method.line}</p>
+          </div>
+          <p className="habit">{report.match.idol.habit}</p>
+          <p className="pull">{report.match.idol.pull}</p>
+        </article>
+
+        <div className="group-head kit-head">
+          <h3>{c.idolMatch.kitTitle}</h3>
+          <p>{c.idolMatch.kitNote}</p>
+        </div>
+        <div className="prods">
+          {report.match.kit.map((p) => (
+            <ProductCard key={`kit-${p.key}`} p={p} stores={stores} />
           ))}
         </div>
+
+        {report.others.length ? (
+          <>
+            <div className="group-head kit-head">
+              <h3>{c.idolMatch.alsoTitle}</h3>
+              <p>{c.idolMatch.alsoNote}</p>
+            </div>
+            <div className="idols">
+              {report.others.map((d, i) => (
+                <article className="idol" key={d.key}>
+                  <div className="ava" style={{ background: ["var(--glow-b)", "var(--glow-c)"][i] }}>{d.i}</div>
+                  <div>
+                    <h3>{d.n}</h3>
+                    <p className="grp">{d.g} · {d.method.name}</p>
+                    <p className="habit">{d.habit}</p>
+                    <p className="pull">{d.pull}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </>
+        ) : null}
+
+        <p className="aff-note">{s.affiliateNote}</p>
       </section>
 
       {variant === "page" ? (
@@ -180,6 +199,35 @@ export default function ReportView({
         </div>
       ) : null}
     </div>
+  );
+}
+
+function ProductCard({
+  p, stores,
+}: {
+  p: import("@/lib/engine").ProductView;
+  stores: import("@/lib/affiliate").StoreKey[];
+}) {
+  return (
+    <article className="prod">
+      <div className="bottle" style={{ background: `linear-gradient(160deg, ${p.c[0]}, ${p.c[1]})` }}>
+        <b>{p.brand}</b>
+      </div>
+      <div className="info">
+        <p className="reason">{p.reason}</p>
+        <p className="brand">{p.brand}</p>
+        <p className="name">{p.name}</p>
+        <p className="why">{p.why}</p>
+        <p className="price">{p.price}</p>
+      </div>
+      <div className="shop">
+        {stores.map((k) => (
+          <a key={k} href={linkFor(p, k)} target="_blank" rel="nofollow sponsored noopener">
+            {storeLabel(k)}
+          </a>
+        ))}
+      </div>
+    </article>
   );
 }
 

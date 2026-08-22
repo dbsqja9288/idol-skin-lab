@@ -397,3 +397,36 @@ button{font:inherit; color:inherit; cursor:pointer; border:none; background:none
 .aff-note{
   margin-top:26px; text-align:center; font-size:12px; color:var(--ink-3);
 }
+
+/* ============ 아이돌 매칭 ============ */
+.match{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:26px 24px; box-shadow:var(--shadow-lg); position:relative; overflow:hidden;
+}
+.match::before{
+  content:''; position:absolute; inset:auto -20% -60% auto; width:320px; height:220px;
+  background:radial-gradient(60% 70% at 70% 100%, var(--glow-b), transparent 70%); opacity:.55;
+}
+.match > *{position:relative}
+.match-top{display:flex; align-items:center; gap:16px}
+.match-top .ava{width:60px; height:60px; font-size:24px}
+.match-top h3{font-family:var(--ff-display); font-size:26px; margin:2px 0 0}
+.match-top .grp{font-size:12px; color:var(--ink-3); font-weight:600; letter-spacing:.08em; text-transform:uppercase; margin-top:3px}
+
+.method{
+  margin-top:20px; padding:16px 18px; border-radius:var(--radius-s);
+  background:var(--surface-2); border:1px solid var(--line);
+}
+.method-label{font-family:var(--ff-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3)}
+.method-name{font-family:var(--ff-display); font-size:18px; font-weight:var(--display-weight); letter-spacing:var(--display-tracking); margin-top:5px}
+.method-line{font-size:14.5px; color:var(--ink-2); margin-top:6px}
+
+.match .habit{margin-top:18px; font-size:15px; color:var(--ink-2); line-height:1.6}
+.match .pull{
+  margin-top:14px; padding-left:14px; border-left:2.5px solid var(--accent);
+  font-family:var(--ff-display); font-style:italic; font-size:17px; line-height:1.4;
+}
+.kit-head{margin-top:34px}
+@media(max-width:520px){
+  .match-top{flex-direction:column; align-items:flex-start; gap:12px}
+}

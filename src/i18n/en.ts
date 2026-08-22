@@ -370,6 +370,27 @@ export const en: Copy = {
     },
   },
 
+  idolMethod: {
+    hydration: { name: "The cold-mask habit", line: "Frequency over intensity — a cold sheet mask most nights, done lying down so it never feels like effort." },
+    gentle: { name: "The recovery day", line: "Deliberately gentle cleansing and bare-faced rest days, so skin gets time between heavy schedules." },
+    spf: { name: "The reapplication rule", line: "Sunscreen treated as the one non-negotiable, reapplied through the day instead of applied once and forgotten." },
+    layering: { name: "The seven-layer method", line: "Thin layers of watery essence patted in until each absorbs, then sealed — volume of hydration without weight." },
+    cleansing: { name: "The double cleanse first", line: "Every trace of the day removed before a single treatment step goes on. Oil melt, then a low-pH wash." },
+    depuff: { name: "The cold-first minimalist", line: "Ice water before anything else, and a short routine repeated exactly, rather than a long one done sometimes." },
+  },
+
+  idolMatch: {
+    title: "Your idol match",
+    note: "Matched on approach, not on their face — this is the method that fits how your skin behaves. Habits are described from published interviews.",
+    matchEyebrow: "Closest to your type",
+    methodLabel: "The method",
+    kitTitle: "Three products that run this method on your skin",
+    kitNote:
+      "Our picks for your four letters, not hers — the method is what you are borrowing. Same shelf as above, used with this approach in mind.",
+    alsoTitle: "Two more habits worth stealing",
+    alsoNote: "Also relevant to your type, method only.",
+  },
+
   share: {
     prompt: (code) => `You are ${code}. Post it — your friends will want to know theirs.`,
     text: (code, name) =>

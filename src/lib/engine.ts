@@ -27,7 +27,10 @@ export type ProductView = Product & {
   reasonKey: ReasonKey;
   reason: string;
 };
-export type IdolView = Idol & { habit: string; pull: string };
+export type IdolView = Idol & { habit: string; pull: string; method: { name: string; line: string } };
+
+/** 매칭된 아이돌 한 명 + 그 방식을 굴리는 제품 3개 */
+export type IdolMatch = { idol: IdolView; kit: ProductView[] };
 
 export type Report = {
   lang: Lang;
@@ -40,7 +43,10 @@ export type Report = {
   cards: { tag: string; head: string; body: string }[];
   routine: { am: Step[]; pm: Step[] };
   products: ProductView[];
-  idols: IdolView[];
+  /** 사용자 타입에 가장 가까운 아이돌 한 명과 그 방식용 제품 3개 */
+  match: IdolMatch;
+  /** 나머지 두 명 — 방식만, 제품 없이 */
+  others: IdolView[];
 };
 
 export function emptyScore(): Score {
@@ -161,19 +167,84 @@ export function groupProducts(products: ProductView[]) {
   );
 }
 
-function idolsOf(l: Letters, c: Copy): IdolView[] {
-  const picked = [
-    l.D === "D" ? IDOLS.layering : IDOLS.cleansing,
-    l.S === "S" ? IDOLS.gentle : IDOLS.hydration,
-    l.P === "P" || l.W === "W" ? IDOLS.spf : IDOLS.depuff,
-  ];
-  return picked.map((d) => ({ ...d, ...c.idolCopy[d.key] }));
+function idolView(key: string, c: Copy): IdolView {
+  return { ...IDOLS[key], ...c.idolCopy[key], method: c.idolMethod[key] };
 }
 
-function assemble(lang: Lang, letters: Letters, axes: AxisView[], strongPigment: boolean): Report {
+/**
+ * 글자 하나가 아이돌 한 명의 '방식'에 대응한다.
+ * 실제 인물의 피부 타입을 주장하는 게 아니라, 그 사람이 인터뷰에서 말한 **관리 방식**이
+ * 이 타입에 맞는지로 고른다. (본인 피부에 대한 사실 주장은 하지 않는다.)
+ */
+const IDOL_FOR_LETTER: Record<string, string> = {
+  D: "layering", O: "cleansing",
+  S: "gentle", R: "hydration",
+  P: "spf", N: "depuff",
+  W: "spf", T: "depuff",
+};
+
+/** 가장 두드러진 축의 글자를 고른다. 점수가 없으면(정적 페이지) 정해진 우선순위를 쓴다. */
+function dominantLetter(l: Letters, score?: Score): keyof typeof IDOL_FOR_LETTER {
+  if (score) {
+    let best: AxisKey = "D";
+    for (const k of AXIS_ORDER) if (Math.abs(score[k]) > Math.abs(score[best])) best = k;
+    return l[best];
+  }
+  // 루틴을 가장 크게 가르는 순서: 반응성 → 유분 → 색소 → 탄력
+  for (const k of ["S", "D", "P", "W"] as AxisKey[]) {
+    if (l[k] === "S" || l[k] === "D" || l[k] === "P" || l[k] === "W") return l[k];
+  }
+  return l.D;
+}
+
+/**
+ * 방식별 제품 3개.
+ * 어떤 방식이든 **사용자 타입에 맞는 제품**으로 채운다 — 아이돌이 쓴다고 주장하지 않는다.
+ */
+function kitFor(method: string, l: Letters, strongPigment: boolean): [Product, ReasonKey][] {
+  const toner: [Product, ReasonKey] = l.S === "S" ? [PRODUCTS.toner_hydra, "S"] : [PRODUCTS.toner_exfo, "R"];
+  const cream: [Product, ReasonKey] =
+    l.D === "D" ? [PRODUCTS.cream_rich, "D"] : l.S === "S" ? [PRODUCTS.cream_barrier, "S"] : [PRODUCTS.cream_light, "O"];
+  const cleanser: [Product, ReasonKey] = l.D === "D" ? [PRODUCTS.cleanse_dry, "D"] : [PRODUCTS.cleanse_oil, "O"];
+  const spf: [Product, ReasonKey] = l.D === "O" ? [PRODUCTS.spf_oily, "O"] : [PRODUCTS.spf_all, "all"];
+  const mask: [Product, ReasonKey] =
+    l.D === "O" && l.S === "R" ? [PRODUCTS.mask_clay, "O"] : [PRODUCTS.mask_sheet, "D"];
+  const bright: [Product, ReasonKey] =
+    l.P === "P" ? [strongPigment ? PRODUCTS.serum_vitc : PRODUCTS.serum_bright, "P"] : [PRODUCTS.serum_hydra, "N"];
+  const treat: [Product, ReasonKey] = l.S === "S" ? [PRODUCTS.serum_cica, "S"] : [PRODUCTS.serum_hydra, "R"];
+
+  switch (method) {
+    case "layering":  return [toner, [PRODUCTS.serum_hydra, l.D === "D" ? "D" : "O"], cream];
+    case "cleansing": return [cleanser, toner, mask];
+    case "gentle":    return [cleanser, treat, cream];
+    case "hydration": return [mask, [PRODUCTS.serum_hydra, "all"], cream];
+    case "spf":       return [spf, bright, cream];
+    default:          return [toner, cream, mask]; // depuff
+  }
+}
+
+function matchOf(l: Letters, strongPigment: boolean, c: Copy, score?: Score): { match: IdolMatch; others: IdolView[] } {
+  const heroKey = IDOL_FOR_LETTER[dominantLetter(l, score)];
+  const pool = [
+    IDOL_FOR_LETTER[l.D], IDOL_FOR_LETTER[l.S], IDOL_FOR_LETTER[l.P], IDOL_FOR_LETTER[l.W],
+  ].filter((k, i, arr) => k !== heroKey && arr.indexOf(k) === i);
+
+  return {
+    match: {
+      idol: idolView(heroKey, c),
+      kit: kitFor(heroKey, l, strongPigment).map(([p, r]) => view(p, r, c)),
+    },
+    others: pool.slice(0, 2).map((k) => idolView(k, c)),
+  };
+}
+
+function assemble(
+  lang: Lang, letters: Letters, axes: AxisView[], strongPigment: boolean, score?: Score,
+): Report {
   const c = getCopy(lang);
   const code = codeOf(letters);
   const lp = c.letterPhrase;
+  const { match, others } = matchOf(letters, strongPigment, c, score);
   return {
     lang,
     code,
@@ -185,7 +256,8 @@ function assemble(lang: Lang, letters: Letters, axes: AxisView[], strongPigment:
     cards: cardsOf(letters, c),
     routine: routineOf(letters, c),
     products: productsOf(letters, strongPigment, c),
-    idols: idolsOf(letters, c),
+    match,
+    others,
   };
 }
 
@@ -210,7 +282,7 @@ export function reportFromScore(score: Score, lang: Lang): Report {
       leaning: b === "neg" ? meta.left : b === "pos" ? meta.right : c.balanced,
     };
   });
-  return assemble(lang, letters, axes, score.P <= -4);
+  return assemble(lang, letters, axes, score.P <= -4, score);
 }
 
 /**
