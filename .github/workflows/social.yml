@@ -1,0 +1,59 @@
+name: Threads 자동 게시
+
+# 하루 6회. 미국 동부 기준 피크타임에 맞췄다.
+#
+# cron은 UTC라서 EST(UTC-5) 기준으로 5시간을 더해 적었다.
+#   07:00 EST → 12:00 UTC   출근길
+#   09:00 EST → 14:00 UTC   오전
+#   12:00 EST → 17:00 UTC   점심
+#   15:00 EST → 20:00 UTC   오후
+#   18:00 EST → 23:00 UTC   퇴근길
+#   21:00 EST → 02:00 UTC   자기 전 (스킨케어 글이 제일 잘 먹히는 시간)
+#
+# 서머타임에는 실제 게시가 한 시간씩 당겨진다. 큰 문제는 아니지만
+# 신경 쓰이면 3월·11월에 아래 숫자를 한 칸씩 옮기면 된다.
+#
+# 주제 4개 × 문안 6개 = 24개라 같은 글이 나흘에 한 번 돌아온다.
+# 스레드 API 한도는 24시간당 250개다. 6회는 여유가 크다.
+on:
+  schedule:
+    - cron: "0 12,14,17,20,23 * * *"
+    - cron: "0 2 * * *"
+  workflow_dispatch: # 수동 실행 버튼
+    inputs:
+      theme:
+        description: "올릴 주제 (비워두면 시각에 따라 자동 교대)"
+        required: false
+        type: choice
+        options: ["", "quiz", "routine", "spf", "idols"]
+        default: ""
+      post_id:
+        description: "문구 id (비워두면 날짜에 따라 자동 교대)"
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  threads:
+    name: 스레드
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: 스레드 게시
+        env:
+          THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          # 도메인을 사면 이 줄만 바꾸면 된다.
+          SITE_URL: ${{ vars.SITE_URL || 'https://idol-skin-lab.vercel.app' }}
+          THEME: ${{ inputs.theme }}
+          POST_ID: ${{ inputs.post_id }}
+        shell: bash
+        run: |
+          # pipefail이 없으면 node가 죽어도 tee의 성공 코드로 덮여 실패가 감춰진다
+          set -o pipefail
+          node scripts/social-post.mjs | tee -a "$GITHUB_STEP_SUMMARY"
