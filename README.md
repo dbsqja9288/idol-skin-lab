@@ -150,16 +150,30 @@ export const OVERRIDE = {
 
 ## 스레드 자동 게시 (선택)
 
-`.github/workflows/social.yml`이 하루 6회 실행되어 `scripts/social-post.mjs`가 만든
-문안을 스레드에 올린다. 주제 4개 × 문안 6개 = 24개라 나흘에 한 바퀴 돈다.
-**GitHub Actions는 공개 저장소에서 무료**이고, 스레드 API도 무료다.
+`.github/workflows/social.yml`이 **매시 정각(UTC)에 하루 24회** 실행되어
+`scripts/social-post.mjs`가 만든 문안을 스레드에 올린다.
 
+**언어는 시각으로 갈린다 — 영어 16회 + 스페인어 8회.**
+
+| | 게시 시각 (UTC) | 노린 시간대 |
+| --- | --- | --- |
+| 스페인어 (8회) | 02 · 04 · 07 · 12 · 15 · 17 · 20 · 22 | 스페인 저녁, 멕시코·중남미 저녁 |
+| 영어 (16회) | 나머지 전부 | 미국 동부 출근길·점심·퇴근길·취침 전 |
+
+문안 풀은 **영어 32개 / 스페인어 24개**. 하루에 쓰는 만큼 순서대로 소진하므로
+영어는 이틀, 스페인어는 사흘에 한 바퀴 돈다. **같은 글이 하루에 두 번 나가지 않는다.**
+
+스레드 API 한도는 24시간당 250개라 24회는 여유가 크다. 진짜 상한은 API가 아니라
+사람이 질리는 속도이므로, 2주쯤 돌려보고 지표를 보고 줄이거나 늘린다.
+줄이려면 `scripts/variants.mjs`의 `ES_HOURS`와 workflow의 cron만 고치면 된다.
+
+**GitHub Actions는 공개 저장소에서 무료**이고, 스레드 API도 무료다.
 토큰이 없으면 초안만 출력하고 끝나므로 설정 전에도 워크플로가 실패하지 않는다.
 
 ### 설정
 
 1. [Meta 개발자 콘솔](https://developers.facebook.com)에서 앱 생성 → **Threads API** 추가
-2. 장기 액세스 토큰과 사용자 ID 발급
+2. 장기 액세스 토큰과 사용자 ID 발급 (스레드 계정은 인스타그램 계정에 딸려 있다)
 3. GitHub 저장소 → Settings → Secrets and variables → Actions
 
 ```
@@ -168,14 +182,16 @@ THREADS_ACCESS_TOKEN   (Secret)
 SITE_URL               (Variable, 도메인 사면 갱신)
 ```
 
-Actions 탭에서 **Run workflow**로 즉시 테스트할 수 있다. 로컬에서는:
+Actions 탭에서 **Run workflow**로 즉시 테스트할 수 있다. 언어·주제·문구를 골라서
+수동 실행할 수도 있다. 로컬에서는:
 
 ```bash
-node scripts/social-post.mjs              # 자동 교대
-THEME=idols POST_ID=fridge node scripts/social-post.mjs   # 특정 문안
+node scripts/social-post.mjs                          # 지금 시각에 맞춰 자동
+LANG_OVERRIDE=es node scripts/social-post.mjs         # 스페인어 강제
+THEME=idols POST_ID=nevera node scripts/social-post.mjs   # 특정 문안
 ```
 
-문안을 고치려면 `scripts/variants.mjs`만 보면 된다.
+문안을 고치려면 `scripts/variants.mjs`만 보면 된다. 영어는 `EN`, 스페인어는 `ES` 객체다.
 
 ---
 
