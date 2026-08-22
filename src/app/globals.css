@@ -354,3 +354,18 @@ button{font:inherit; color:inherit; cursor:pointer; border:none; background:none
 .ad-frame{margin:36px auto; max-width:var(--maxw); padding:0 22px}
 .ad-frame > p{text-align:center; font-size:11px; letter-spacing:.08em; color:var(--ink-3); margin-bottom:6px; text-transform:uppercase}
 .ad-box{display:flex; justify-content:center}
+
+/* 헤더 오른쪽 묶음 + 언어 전환 */
+.head-right{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.langs{display:flex; gap:2px; border:1px solid var(--line); border-radius:100px; padding:2px; background:var(--surface)}
+.langs a{
+  text-decoration:none; font-size:11.5px; font-weight:700; letter-spacing:.06em;
+  color:var(--ink-3); padding:4px 10px; border-radius:100px; transition:.15s;
+}
+.langs a:hover{color:var(--accent-deep)}
+.langs a.on{background:var(--accent); color:#fff}
+:root[data-theme="dark"] .langs a.on{color:#2A121C}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .langs a.on{color:#2A121C} }
+@media(max-width:620px){
+  .head-right{width:100%; justify-content:space-between}
+}

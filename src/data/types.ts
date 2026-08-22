@@ -1,43 +1,26 @@
-/** 네 축. 각 축은 두 글자 중 하나로 결론난다. */
 export type AxisKey = "D" | "S" | "P" | "W";
 export type Band = "neg" | "mid" | "pos";
 export type Score = Record<AxisKey, number>;
 
-export type Choice = {
-  label: string;
-  sub?: string;
-  weight: Partial<Score>;
-};
+export type Lang = "en" | "es";
 
-export type Question = {
-  theme: string;
-  q: string;
-  hint: string;
-  a: Choice[];
-};
-
+/** 언어와 무관한 제품 정보. 설명(step/why)은 i18n에 있다. */
 export type Product = {
   key: string;
-  step: string;
   brand: string;
   name: string;
-  why: string;
   price: string;
   c: [string, string];
 };
 
+/** 언어와 무관한 인물 정보. 습관 설명은 i18n에 있다. */
 export type Idol = {
   key: string;
   n: string;
   g: string;
   i: string;
-  habit: string;
-  pull: string;
 };
 
-export type AxisMeta = {
-  left: string;
-  right: string;
-  title: string;
-  copy: Record<Band, string>;
-};
+export type Choice = { label: string; sub?: string };
+export type Question = { theme: string; q: string; hint: string; a: Choice[] };
+export type AxisMeta = { left: string; right: string; title: string; copy: Record<Band, string> };

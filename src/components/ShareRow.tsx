@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SITE_NAME } from "@/lib/site";
+import type { Lang } from "@/data/types";
+import { getCopy, path } from "@/i18n";
 
 /**
  * 결과 공유 줄.
@@ -9,18 +10,16 @@ import { SITE_NAME } from "@/lib/site";
  * 인스타그램은 웹 공유 인텐트가 없어서 캡션을 클립보드에 넣어준다.
  * 붙여넣기만 하면 되므로 실제로는 이게 제일 잘 쓰인다.
  */
-export default function ShareRow({ code, name }: { code: string; name: string }) {
+export default function ShareRow({ code, name, lang }: { code: string; name: string; lang: Lang }) {
+  const c = getCopy(lang);
   const [url, setUrl] = useState("");
   const [flash, setFlash] = useState<string | null>(null);
 
   // 배포 주소는 브라우저에서만 확실히 알 수 있다 (도메인이 바뀌어도 따라간다)
-  useEffect(() => setUrl(window.location.origin + "/type/" + code), [code]);
+  useEffect(() => setUrl(window.location.origin + path(lang, "/type/" + code)), [code, lang]);
 
-  const text =
-    `I just got ${code} — “${name}” — on ${SITE_NAME}. ` +
-    "Ten questions and it read my skin better than the last three products I bought. Find your type: ";
-  const tags = `#IdolSkinType #KBeauty #KPopSkincare #SkinType${code}`;
-  const caption = `${text}${url}\n\n${tags}`;
+  const text = c.share.text(code, name);
+  const caption = `${text}${url}\n\n${c.share.tags(code)}`;
 
   async function copy(payload: string, label: string) {
     let ok = true;
@@ -29,13 +28,13 @@ export default function ShareRow({ code, name }: { code: string; name: string })
     } catch {
       ok = false;
     }
-    setFlash(ok ? label : "Press ⌘C to copy");
+    setFlash(ok ? label : c.share.manualCopy);
     setTimeout(() => setFlash(null), 2600);
   }
 
   return (
     <div className="share">
-      <p className="prompt">You are {code}. Post it — your friends will want to know theirs.</p>
+      <p className="prompt">{c.share.prompt(code)}</p>
       <div className="btns">
         <a
           className="sbtn"
@@ -55,13 +54,13 @@ export default function ShareRow({ code, name }: { code: string; name: string })
           <IconThreads />
           Threads
         </a>
-        <button className={`sbtn${flash ? " done" : ""}`} onClick={() => copy(caption, "Caption copied — paste it")}>
+        <button className={`sbtn${flash ? " done" : ""}`} onClick={() => copy(caption, c.share.copied)}>
           <IconInstagram />
           {flash ?? "Instagram"}
         </button>
-        <button className="sbtn" onClick={() => copy(url, "Link copied")}>
+        <button className="sbtn" onClick={() => copy(url, c.share.linkCopied)}>
           <IconLink />
-          Copy link
+          {c.share.copyLink}
         </button>
       </div>
     </div>

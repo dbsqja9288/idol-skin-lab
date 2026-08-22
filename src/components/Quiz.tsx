@@ -1,21 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { QUESTIONS } from "@/data/questions";
+import { QUESTION_COUNT } from "@/data/questions";
+import type { Lang } from "@/data/types";
+import { getCopy } from "@/i18n";
 import { reportFromScore, tally } from "@/lib/engine";
 import ReportView from "./Report";
 
 type Stage = "intro" | "quiz" | "loading" | "report";
 
-const LOADING_STEPS = [
-  "Reading your barrier",
-  "Weighing how you hold pigment",
-  "Checking your sun history",
-  "Pulling formulas off the Seoul shelf",
-  "Writing it up",
-];
-
-export default function Quiz() {
+export default function Quiz({ lang }: { lang: Lang }) {
+  const c = getCopy(lang);
   const [stage, setStage] = useState<Stage>("intro");
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
@@ -36,9 +31,8 @@ export default function Quiz() {
         next[idx] = i;
         setAnswers(next);
         setPicked(null);
-        if (idx + 1 < QUESTIONS.length) {
-          setIdx(idx + 1);
-        } else {
+        if (idx + 1 < QUESTION_COUNT) setIdx(idx + 1);
+        else {
           setLoadStep(0);
           go("loading");
         }
@@ -52,48 +46,43 @@ export default function Quiz() {
     if (stage !== "loading") return;
     const t = setInterval(() => {
       setLoadStep((s) => {
-        if (s + 1 < LOADING_STEPS.length) return s + 1;
+        if (s + 1 < c.quiz.loading.length) return s + 1;
         clearInterval(t);
         go("report");
         return s;
       });
     }, 620);
     return () => clearInterval(t);
-  }, [stage, go]);
+  }, [stage, go, c.quiz.loading.length]);
 
   // A–D 키로 답하기
   useEffect(() => {
     if (stage !== "quiz") return;
     const onKey = (e: KeyboardEvent) => {
       const k = e.key.toUpperCase().charCodeAt(0) - 65;
-      if (k >= 0 && k < QUESTIONS[idx].a.length) pick(k);
+      if (k >= 0 && k < c.questions[idx].a.length) pick(k);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [stage, idx, pick]);
+  }, [stage, idx, pick, c.questions]);
 
-  function back() {
-    if (idx === 0) {
-      go("intro");
-      return;
-    }
-    setIdx(idx - 1);
-    setAnswers(answers.slice(0, idx - 1));
+  function restart() {
+    setIdx(0);
+    setAnswers([]);
+    go("intro");
   }
 
   if (stage === "intro") {
     return (
       <div className="screen on">
         <div className="intro">
-          <p className="eyebrow">Backstage skin consultation · Seoul</p>
+          <p className="eyebrow">{c.intro.eyebrow}</p>
           <h1>
-            I prep idol skin for <em>comeback week</em>. Let me read yours.
+            {c.intro.h1[0]}
+            <em>{c.intro.h1[1]}</em>
+            {c.intro.h1[2]}
           </h1>
-          <p className="lede">
-            I&apos;m the one backstage with the fridge full of sheet masks, ten minutes before the cameras. Answer the same ten
-            questions I&apos;d ask you in the chair and I&apos;ll tell you what your skin is actually asking for — and which Korean
-            formulas answer it.
-          </p>
+          <p className="lede">{c.intro.lede}</p>
 
           <button
             className="cta"
@@ -103,28 +92,22 @@ export default function Quiz() {
               go("quiz");
             }}
           >
-            Read my skin
+            {c.intro.cta}
             <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true">
               <path d="M3 8.5h11M9.5 4l4.5 4.5L9.5 13" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <p className="meta">Free · about 90 seconds · no sign-up, no email required</p>
+          <p className="meta">{c.intro.meta}</p>
 
-          <FaceDiagram />
+          <FaceDiagram labels={c.intro.face} />
 
           <div className="credlist">
-            <div>
-              <strong>16</strong>
-              <span>types, read the way we read skin in a Seoul treatment room — four axes, not four vague labels</span>
-            </div>
-            <div>
-              <strong>90s</strong>
-              <span>the same questions I&apos;d ask you in the chair, minus the wait for an appointment</span>
-            </div>
-            <div>
-              <strong>AM/PM</strong>
-              <span>a layering order you can run tonight, in the order idols actually run it</span>
-            </div>
+            {c.intro.cred.map((x) => (
+              <div key={x.n}>
+                <strong>{x.n}</strong>
+                <span>{x.t}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -132,18 +115,18 @@ export default function Quiz() {
   }
 
   if (stage === "quiz") {
-    const q = QUESTIONS[idx];
+    const q = c.questions[idx];
     return (
       <div className="screen on">
         <div className="qtop">
-          <button className="back" onClick={back}>
-            ← Back
+          <button className="back" onClick={() => (idx === 0 ? go("intro") : (setIdx(idx - 1), setAnswers(answers.slice(0, idx - 1))))}>
+            {c.quiz.back}
           </button>
           <div className="bar">
-            <i style={{ width: `${(idx / QUESTIONS.length) * 100}%` }} />
+            <i style={{ width: `${(idx / QUESTION_COUNT) * 100}%` }} />
           </div>
           <span className="qcount">
-            {String(idx + 1).padStart(2, "0")} / {String(QUESTIONS.length).padStart(2, "0")}
+            {String(idx + 1).padStart(2, "0")} / {String(QUESTION_COUNT).padStart(2, "0")}
           </span>
         </div>
         <div className="qbody">
@@ -171,41 +154,30 @@ export default function Quiz() {
       <div className="screen on">
         <div className="loading">
           <div className="pulse" aria-hidden="true" />
-          <p className="eyebrow">One moment</p>
-          <p className="step">{LOADING_STEPS[loadStep]}</p>
+          <p className="eyebrow">{c.quiz.oneMoment}</p>
+          <p className="step">{c.quiz.loading[loadStep]}</p>
         </div>
       </div>
     );
   }
 
-  const report = reportFromScore(tally(answers));
+  const report = reportFromScore(tally(answers), lang);
   return (
     <div className="screen on">
       <ReportView report={report} variant="quiz" />
       <div className="callout">
-        <h2>Want me to walk you through week one?</h2>
-        <p>
-          I&apos;ll send a four-week build for your type — what to add, what night to add it on, and a nudge when your actives are
-          due to run out.
-        </p>
-        <MailRow />
+        <h2>{c.callout.title}</h2>
+        <p>{c.callout.body}</p>
+        <MailRow placeholder={c.callout.placeholder} button={c.callout.button} sentLabel={c.callout.sent} />
       </div>
       <div className="restart">
-        <button
-          onClick={() => {
-            setIdx(0);
-            setAnswers([]);
-            go("intro");
-          }}
-        >
-          Read my skin again
-        </button>
+        <button onClick={restart}>{c.restart}</button>
       </div>
     </div>
   );
 }
 
-function MailRow() {
+function MailRow({ placeholder, button, sentLabel }: { placeholder: string; button: string; sentLabel: string }) {
   const [sent, setSent] = useState(false);
   return (
     <form
@@ -215,16 +187,16 @@ function MailRow() {
         setSent(true);
       }}
     >
-      <input type="email" placeholder="you@email.com" aria-label="Email address" required disabled={sent} />
-      <button type="submit">{sent ? "Sent ✓" : "Send it"}</button>
+      <input type="email" placeholder={placeholder} aria-label={placeholder} required disabled={sent} />
+      <button type="submit">{sent ? sentLabel : button}</button>
     </form>
   );
 }
 
-function FaceDiagram() {
+function FaceDiagram({ labels }: { labels: { tzone: string; cheeks: string; jaw: string } }) {
   return (
     <div className="face-wrap" aria-hidden="true">
-      <svg viewBox="0 0 300 210" fill="none">
+      <svg viewBox="-6 0 318 210" fill="none">
         <ellipse cx="150" cy="105" rx="72" ry="92" fill="var(--surface)" stroke="var(--line)" strokeWidth="1.5" />
         <path d="M150 13c-40 0-72 34-72 76 0 8 1 15 3 22" stroke="var(--accent)" strokeWidth="1.5" opacity=".5" />
         <path d="M150 30c-16 0-27 8-27 8v52h54V38s-11-8-27-8z" fill="var(--accent-soft)" opacity=".85" />
@@ -235,13 +207,13 @@ function FaceDiagram() {
         <g fontFamily="ui-monospace, monospace" fontSize="9" letterSpacing="1" fill="var(--ink-3)">
           <line x1="150" y1="52" x2="252" y2="34" stroke="var(--line)" strokeWidth="1" />
           <circle cx="150" cy="52" r="2.6" fill="var(--accent)" />
-          <text x="256" y="37">T-ZONE</text>
+          <text x="256" y="37">{labels.tzone}</text>
           <line x1="106" y1="108" x2="42" y2="88" stroke="var(--line)" strokeWidth="1" />
           <circle cx="106" cy="108" r="2.6" fill="var(--accent)" />
-          <text x="4" y="84">CHEEKS</text>
+          <text x="4" y="84">{labels.cheeks}</text>
           <line x1="150" y1="168" x2="248" y2="182" stroke="var(--line)" strokeWidth="1" />
           <circle cx="150" cy="168" r="2.6" fill="var(--accent)" />
-          <text x="252" y="186">JAW</text>
+          <text x="252" y="186">{labels.jaw}</text>
         </g>
       </svg>
     </div>
