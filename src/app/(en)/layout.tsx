@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import RootShell from "@/components/RootShell";
 import { getCopy } from "@/i18n";
-import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { SITE_NAME, SITE_URL, verificationTags } from "@/lib/site";
 import "../globals.css";
 
 const c = getCopy("en");
@@ -20,9 +20,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${SITE_NAME} — ${c.meta.tagline}`, description: c.meta.description },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
-    other: process.env.NEXT_PUBLIC_ADSENSE_CLIENT
-      ? { "google-adsense-account": process.env.NEXT_PUBLIC_ADSENSE_CLIENT }
-      : {},
+    other: verificationTags(),
   },
 };
 

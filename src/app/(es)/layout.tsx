@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import RootShell from "@/components/RootShell";
 import { getCopy } from "@/i18n";
-import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { SITE_NAME, SITE_URL, verificationTags } from "@/lib/site";
 import "../globals.css";
 
 const c = getCopy("es");
@@ -18,6 +18,7 @@ export const metadata: Metadata = {
     description: c.meta.description,
   },
   twitter: { card: "summary_large_image", title: `${SITE_NAME} — ${c.meta.tagline}`, description: c.meta.description },
+  verification: { other: verificationTags() },
 };
 
 export default function EsLayout({ children }: { children: React.ReactNode }) {

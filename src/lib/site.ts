@@ -25,3 +25,24 @@ export const SITE_URL = resolve();
 export const SITE_NAME = "Idol Skin Lab";
 export const SITE_TAGLINE = "The skin read idols get before comeback week";
 export const CONTACT_EMAIL = "dbsqja9288@gmail.com";
+
+/**
+ * 사이트 소유 확인용 메타태그 값들.
+ * 공개돼도 무해한 값이라 코드에 둔다. 바꾸고 싶으면 환경변수가 우선한다.
+ */
+export const VERIFY = {
+  /** FlexOffers — 제휴 네트워크 소유 확인 */
+  flexoffers: process.env.NEXT_PUBLIC_FO_VERIFY?.trim() || "3c65063f-0a40-4b05-a57d-e7e8c6d08b28",
+  google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION?.trim() || "",
+  naver: process.env.NEXT_PUBLIC_NAVER_VERIFICATION?.trim() || "",
+};
+
+/** metadata.verification.other 에 그대로 넣을 수 있는 형태로 만든다 */
+export function verificationTags(): Record<string, string> {
+  const t: Record<string, string> = { "fo-verify": VERIFY.flexoffers };
+  if (VERIFY.naver) t["naver-site-verification"] = VERIFY.naver;
+  if (process.env.NEXT_PUBLIC_ADSENSE_CLIENT) {
+    t["google-adsense-account"] = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+  }
+  return t;
+}
