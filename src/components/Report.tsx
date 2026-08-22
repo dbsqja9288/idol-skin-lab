@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import Link from "next/link";
-import type { Report } from "@/lib/engine";
+import { groupProducts, type Report } from "@/lib/engine";
 import { activeStores, linkFor, storeLabel } from "@/lib/affiliate";
 import { getCopy, path } from "@/i18n";
 import ShareRow from "./ShareRow";
@@ -108,34 +108,42 @@ export default function ReportView({
       <section className="sec">
         <div className="sec-head">
           <h2>{s.productsTitle}</h2>
-          <p>
-            {s.productsNote} <strong>{s.affiliateNote}</strong>
-          </p>
+          <p>{s.productsNote}</p>
         </div>
-        <div className="prods">
-          {report.products.map((p) => (
-            <article className="prod" key={p.key}>
-              <div className="bottle" style={{ background: `linear-gradient(160deg, ${p.c[0]}, ${p.c[1]})` }}>
-                <b>{p.brand}</b>
-              </div>
-              <div className="info">
-                <p className="step-lbl">
-                  {p.step} · {p.price}
-                </p>
-                <p className="brand">{p.brand}</p>
-                <p className="name">{p.name}</p>
-                <p className="why">{p.why}</p>
-              </div>
-              <div className="shop">
-                {stores.map((k) => (
-                  <a key={k} href={linkFor(p, k)} target="_blank" rel="nofollow sponsored noopener">
-                    {storeLabel(k)}
-                  </a>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
+
+        {groupProducts(report.products).map(({ group, items }) => (
+          <div className="prod-group" key={group}>
+            <div className="group-head">
+              <h3>{c.productStep[group]}</h3>
+              <p>{c.productStepNote[group]}</p>
+            </div>
+            <div className="prods">
+              {items.map((p) => (
+                <article className="prod" key={p.key}>
+                  <div className="bottle" style={{ background: `linear-gradient(160deg, ${p.c[0]}, ${p.c[1]})` }}>
+                    <b>{p.brand}</b>
+                  </div>
+                  <div className="info">
+                    <p className="reason">{p.reason}</p>
+                    <p className="brand">{p.brand}</p>
+                    <p className="name">{p.name}</p>
+                    <p className="why">{p.why}</p>
+                    <p className="price">{p.price}</p>
+                  </div>
+                  <div className="shop">
+                    {stores.map((k) => (
+                      <a key={k} href={linkFor(p, k)} target="_blank" rel="nofollow sponsored noopener">
+                        {storeLabel(k)}
+                      </a>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <p className="aff-note">{s.affiliateNote}</p>
       </section>
 
       <section className="sec">

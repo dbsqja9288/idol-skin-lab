@@ -1,5 +1,7 @@
 import type { AxisKey, AxisMeta, Lang, Question } from "@/data/types";
 
+export type StepKey = "cleanse" | "toner" | "serum" | "night" | "moisturiser" | "spf" | "weekly";
+
 /**
  * 언어 하나가 제공해야 하는 문구 전부.
  *
@@ -74,6 +76,7 @@ export type Copy = {
     eveningSub: string;
     productsTitle: string;
     productsNote: string;
+    /** 제품 목록 끝에 조용히 붙는 제휴 고지 (법적으로 필요하다 — 아래 주석 참고) */
     affiliateNote: string;
     idolsTitle: string;
     idolsNote: string;
@@ -98,8 +101,12 @@ export type Copy = {
     pmSeal: string; pmSealDry: string; pmSealOily: string;
   };
 
-  productStep: Record<"cleanse" | "toner" | "serum" | "night" | "moisturiser" | "spf" | "weekly", string>;
-  /** 제품 key → 추천 이유 */
+  productStep: Record<StepKey, string>;
+  /** 카테고리 소제목 밑에 붙는 한 줄 — 이 단계가 왜 있는지 */
+  productStepNote: Record<StepKey, string>;
+  /** 어떤 글자 때문에 이 제품이 뽑혔는지 — 카드 위 배지 문구 */
+  productReason: Record<string, string>;
+  /** 제품 key → 왜 **너의** 피부에 이게 맞는지 */
   productWhy: Record<string, string>;
   /** 인물 key → 습관 설명과 한 줄 */
   idolCopy: Record<string, { habit: string; pull: string }>;

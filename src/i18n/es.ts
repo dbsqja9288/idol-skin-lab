@@ -247,9 +247,8 @@ export const es: Copy = {
     evening: "Noche", eveningSub: "Limpiar y reparar — de 8 a 10 minutos",
     productsTitle: "Elegidos para ti",
     productsNote:
-      "Escogidos según tus cuatro letras, de marcas coreanas que de verdad se venden en Myeongdong, no de líneas hechas solo para exportar. Precios orientativos.",
-    affiliateNote:
-      "Son enlaces de afiliado: si compras a través de ellos gano una pequeña comisión sin coste adicional para ti.",
+      "Ocho productos escogidos según tus cuatro letras, no una lista de más vendidos. Cada uno de los otros quince tipos recibe un estante distinto, y cada ficha te dice qué letra tuya lo puso ahí. Precios orientativos.",
+    affiliateNote: "Algunos enlaces son de afiliado. Tu precio es el mismo en cualquier caso.",
     idolsTitle: "Tomado de los idols",
     idolsNote:
       "Hábitos que artistas del K-pop han contado en entrevistas y reportajes de belleza, filtrados a los que tienen sentido para este tipo. Solo el método: sin fotos, sin patrocinio.",
@@ -288,27 +287,66 @@ export const es: Copy = {
 
   productStep: {
     cleanse: "Limpieza", toner: "Tónico", serum: "Sérum", night: "Activo de noche",
-    moisturiser: "Hidratante", spf: "Protector solar", weekly: "Semanal",
+    moisturiser: "Hidratante", spf: "Protector solar", weekly: "Tratamiento semanal",
+  },
+
+  productStepNote: {
+    cleanse: "Todo lo que viene después depende de que este paso encaje con tu barrera.",
+    toner: "En una rutina coreana el tónico es una capa de tratamiento, no un desmaquillante.",
+    serum: "El único paso apuntado directamente a tu preocupación principal.",
+    night: "La reparación ocurre mientras duermes. De aquí sale el cambio de verdad.",
+    moisturiser: "Aquí pesa más la textura que la marca: demasiado densa congestiona, demasiado ligera no sella.",
+    spf: "El producto más rentable de tu rutina, en los dieciséis tipos sin excepción.",
+    weekly: "Una o dos veces por semana, para que los pasos diarios sigan funcionando.",
+  },
+
+  productReason: {
+    D: "Porque tu barrera tiende a la sequedad",
+    O: "Porque produces sebo de verdad",
+    S: "Porque tu piel reacciona antes de tolerar",
+    R: "Porque tu barrera lo aguanta",
+    P: "Porque retienes el pigmento",
+    N: "Porque tu tono se mantiene parejo",
+    W: "Porque las líneas ya se están fijando",
+    T: "Porque aún estás en la ventana de prevención",
+    all: "Para todo el mundo. Todos los tipos.",
   },
 
   productWhy: {
-    cleanse_dry: "pH bajo y nada agresivo: deja los lípidos de la barrera donde deben estar.",
-    cleanse_oil: "Disuelve el sebo y el protector solar sin ese chirrido que dispara más grasa.",
-    toner_hydra: "La Houttuynia cordata calma la rojez de fondo mientras hidrata.",
-    toner_exfo: "Una mezcla suave de ácidos para uso diario que evita que la congestión se vuelva grano.",
-    serum_hydra: "Cinco pesos moleculares de ácido hialurónico: hidratación que llega más allá de la superficie.",
-    serum_cica: "Centella para una barrera que se irrita antes de tolerar.",
-    serum_bright: "La niacinamida al 2% interrumpe el traspaso de pigmento antes de que la marca se fije.",
-    serum_vitc: "Un derivado estable de vitamina C: ilumina sin escocer.",
-    serum_retinal: "El retinal actúa más rápido que el retinol con el mismo coste en irritación.",
-    serum_ferment: "Fermento de levadura filtrado, la respuesta coreana de siempre para la firmeza.",
-    cream_rich: "Rica en ceramidas y sin perfume: el caballo de batalla de la barrera seca.",
-    cream_light: "Textura gel-crema: sella la hidratación sin sumar brillo.",
-    cream_barrier: "Base de agua mineral con un sellado lipídico ligero: calma, no peso.",
-    spf_all: "El filtro químico coreano más usado, y por algo será: sin velo blanco, sin película.",
-    spf_oily: "Acabado acuoso que se queda bajo el maquillaje sin apelmazarse en piel grasa.",
-    mask_sheet: "La mascarilla que las idols tienen de verdad en la nevera, por cajas.",
-    mask_clay: "La arcilla de Jeju saca la congestión del poro sin resecar el resto.",
+    cleanse_dry:
+      "Tu barrera ya va corta de lípidos, así que el limpiador equivocado deshace la rutina entera antes de empezar. Este trabaja al pH de la piel y levanta el día sin llevarse las grasas: sales del baño con la cara cómoda en vez de tirante, y eso es lo primero que cambia en una piel seca.",
+    cleanse_oil:
+      "Si arrasas una piel grasa, responde fabricando más grasa una hora después. Esta textura de leche disuelve el sebo y el protector solar y ahí se para, así que quedas limpia de verdad sin el chirrido que dispara el rebote. El brillo de las cuatro de la tarde baja en unas semanas, no de un día para otro.",
+    toner_hydra:
+      "Una piel reactiva va mejor con un tónico que trate que con uno que tense. El extracto de Houttuynia al 77% le quita el calor a la rojez de fondo mientras hidrata, así puedes poner activos encima de una base calmada y no sobre una piel ya irritada.",
+    toner_exfo:
+      "Tu barrera tolera los ácidos, así que una mezcla suave a diario es la forma más barata de evitar que la congestión se convierta en grano. Tres tipos de ácido trabajan a tres profundidades a la vez: mantiene el poro limpio sin el escozor de un peeling fuerte semanal, y la textura se alisa en un mes aproximadamente.",
+    serum_hydra:
+      "La hidratación es el paso que casi todo el mundo falla por poner una sola capa densa. Cinco pesos moleculares de ácido hialurónico llegan a profundidades distintas al mismo tiempo, así el agua va donde de verdad falta en lugar de quedarse arriba y evaporarse.",
+    serum_cica:
+      "Cuando una piel se irrita antes de tolerar, la solución no es una versión más suave de lo mismo: es centella, que calma la reacción en sí. Este es el sérum que por fin le permite a una piel sensible construir una rutina, porque corta el ciclo de reaccionar, retirarse y volver a empezar.",
+    serum_bright:
+      "Tu piel responde a la inflamación con pigmento, y una vez que la marca se fija tarda meses. La niacinamida al 2% interrumpe el traspaso antes de que ocurra: estás evitando marcas, no borrándolas. El propóleo se ocupa de la cicatrización en paralelo.",
+    serum_vitc:
+      "Te marcas con fuerza, así que necesitas el extremo correctivo de la gama, no el suave. Es un derivado estabilizado de vitamina C: hace el trabajo iluminador del ácido ascórbico puro sin el escozor ni la oxidación, y eso significa que podrás usarlo el tiempo suficiente para ver el cambio.",
+    serum_retinal:
+      "El retinal se convierte en ácido retinoico en un solo paso en vez de dos, así que actúa bastante más rápido que el retinol con el mismo coste en irritación. Tu barrera lo aguanta, o sea que puedes ir directa al ingrediente eficaz en lugar de pasar seis meses subiendo escalones.",
+    serum_ferment:
+      "Necesitas apoyo de colágeno pero tu piel reacciona a los retinoides de siempre. El fermento de levadura filtrado es la respuesta coreana de toda la vida a exactamente ese problema: firmeza sin purga, aplicado cada noche en lugar de dos veces por semana con miedo.",
+    cream_rich:
+      "Una barrera seca no necesita más agua, necesita los lípidos que retienen esa agua. Esta es rica en ceramidas y sin perfume, y es a la que recurren las esteticistas cuando una cara se descama bajo el maquillaje: el cambio se nota en unos cuatro días.",
+    cream_light:
+      "Saltarte la hidratante por tener piel grasa es justo lo que te vuelve más grasa: la piel deshidratada compensa con sebo. Esta textura gel sella sin sumar ni un punto de brillo, que es el equilibrio que la piel grasa normalmente no encuentra.",
+    cream_barrier:
+      "A la piel sensible se la suele empujar hacia cremas densas que congestionan. Esta es de base de agua mineral con un sellado lipídico ligero: calma sin peso, así mantienes la barrera alimentada sin darte algo nuevo a lo que reaccionar.",
+    spf_all:
+      "Este es el producto que rinde más que ningún otro de tu rutina, así que tiene que ser uno que te vayas a poner de verdad todos los días. Sin velo blanco, sin película, sin apelmazarse bajo el maquillaje: por eso es el filtro coreano más usado.",
+    spf_oily:
+      "La mayoría de protectores fallan en piel grasa apelmazándose o resbalando al mediodía. Este tiene un acabado acuoso que fija y se queda bajo el maquillaje, lo que convierte el protector solar de una negociación diaria en algo en lo que dejas de pensar.",
+    mask_sheet:
+      "Lo que separa la piel de las idols de la del resto no es un producto, es la frecuencia. Guárdalas frías en la nevera y los diez minutos dejan de costar: ese es todo el truco, y funciona en tu tipo porque tu barrera quiere volumen de hidratación, no peso.",
+    mask_clay:
+      "Tu combinación de grasa y barrera resistente es exactamente para lo que existe la arcilla. La arcilla volcánica de Jeju saca la congestión del poro sin resecar el resto de la cara, una o dos veces por semana: lo justo para que el poro no se cierre, sin llegar a disparar el rebote de grasa.",
   },
 
   idolCopy: {

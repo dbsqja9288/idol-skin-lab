@@ -3,7 +3,7 @@ import { PRODUCTS } from "@/data/products";
 import { IDOLS } from "@/data/idols";
 import type { AxisKey, AxisMeta, Band, Idol, Lang, Product, Score } from "@/data/types";
 import { getCopy } from "@/i18n";
-import type { Copy } from "@/i18n/types";
+import type { Copy, StepKey } from "@/i18n/types";
 
 export const AXIS_ORDER: AxisKey[] = ["D", "S", "P", "W"];
 
@@ -17,7 +17,16 @@ export type Letters = { D: "D" | "O"; S: "S" | "R"; P: "P" | "N"; W: "W" | "T" }
 
 export type AxisView = { key: AxisKey; meta: AxisMeta; pos: number; band: Band; leaning: string };
 export type Step = { t: string; s: string };
-export type ProductView = Product & { step: string; why: string };
+export type ReasonKey = "D" | "O" | "S" | "R" | "P" | "N" | "W" | "T" | "all";
+export type ProductView = Product & {
+  /** 카테고리 key — 리포트에서 소제목으로 묶는 데 쓴다 */
+  group: StepKey;
+  step: string;
+  why: string;
+  /** 이 제품을 뽑은 글자 */
+  reasonKey: ReasonKey;
+  reason: string;
+};
 export type IdolView = Idol & { habit: string; pull: string };
 
 export type Report = {
@@ -94,8 +103,11 @@ function routineOf(l: Letters, c: Copy): { am: Step[]; pm: Step[] } {
   return { am, pm };
 }
 
-/** 제품 key → 어떤 단계 이름을 붙일지. 언어별 단계명은 copy.productStep에 있다. */
-const STEP_OF: Record<string, keyof Copy["productStep"]> = {
+/** 리포트에 나오는 카테고리 순서. 루틴을 쓰는 순서 그대로다. */
+export const STEP_ORDER: StepKey[] = ["cleanse", "toner", "serum", "night", "moisturiser", "spf", "weekly"];
+
+/** 제품 key → 어떤 단계에 속하는지. 언어별 단계명은 copy.productStep에 있다. */
+const STEP_OF: Record<string, StepKey> = {
   cleanse_dry: "cleanse", cleanse_oil: "cleanse",
   toner_hydra: "toner", toner_exfo: "toner",
   serum_hydra: "serum", serum_cica: "serum", serum_bright: "serum", serum_vitc: "serum",
@@ -105,21 +117,48 @@ const STEP_OF: Record<string, keyof Copy["productStep"]> = {
   mask_sheet: "weekly", mask_clay: "weekly",
 };
 
-function view(p: Product, c: Copy): ProductView {
-  return { ...p, step: c.productStep[STEP_OF[p.key]], why: c.productWhy[p.key] };
+function view(p: Product, reasonKey: ReasonKey, c: Copy): ProductView {
+  const group = STEP_OF[p.key];
+  return {
+    ...p,
+    group,
+    step: c.productStep[group],
+    why: c.productWhy[p.key],
+    reasonKey,
+    reason: c.productReason[reasonKey],
+  };
 }
 
+/**
+ * 어떤 제품을 뽑을지, 그리고 **어느 글자 때문에 뽑았는지**.
+ * 이유를 함께 들고 다녀야 카드에 "네 D 때문에 이걸 골랐다"고 말해줄 수 있다.
+ */
 function productsOf(l: Letters, strongPigment: boolean, c: Copy): ProductView[] {
-  const picks: Product[] = [];
-  picks.push(l.D === "D" ? PRODUCTS.cleanse_dry : PRODUCTS.cleanse_oil);
-  picks.push(l.S === "S" ? PRODUCTS.toner_hydra : PRODUCTS.toner_exfo);
-  picks.push(l.S === "S" ? PRODUCTS.serum_cica : PRODUCTS.serum_hydra);
-  if (l.P === "P") picks.push(strongPigment ? PRODUCTS.serum_vitc : PRODUCTS.serum_bright);
-  if (l.W === "W") picks.push(l.S === "S" ? PRODUCTS.serum_ferment : PRODUCTS.serum_retinal);
-  picks.push(l.D === "D" ? PRODUCTS.cream_rich : l.S === "S" ? PRODUCTS.cream_barrier : PRODUCTS.cream_light);
-  picks.push(l.D === "O" ? PRODUCTS.spf_oily : PRODUCTS.spf_all);
-  picks.push(l.D === "O" && l.S === "R" ? PRODUCTS.mask_clay : PRODUCTS.mask_sheet);
-  return picks.map((p) => view(p, c));
+  const picks: [Product, ReasonKey][] = [];
+
+  picks.push(l.D === "D" ? [PRODUCTS.cleanse_dry, "D"] : [PRODUCTS.cleanse_oil, "O"]);
+  picks.push(l.S === "S" ? [PRODUCTS.toner_hydra, "S"] : [PRODUCTS.toner_exfo, "R"]);
+  picks.push(l.S === "S" ? [PRODUCTS.serum_cica, "S"] : [PRODUCTS.serum_hydra, "R"]);
+  if (l.P === "P") picks.push([strongPigment ? PRODUCTS.serum_vitc : PRODUCTS.serum_bright, "P"]);
+  if (l.W === "W") picks.push([l.S === "S" ? PRODUCTS.serum_ferment : PRODUCTS.serum_retinal, "W"]);
+  picks.push(
+    l.D === "D"
+      ? [PRODUCTS.cream_rich, "D"]
+      : l.S === "S"
+        ? [PRODUCTS.cream_barrier, "S"]
+        : [PRODUCTS.cream_light, "O"],
+  );
+  picks.push(l.D === "O" ? [PRODUCTS.spf_oily, "O"] : [PRODUCTS.spf_all, "all"]);
+  picks.push(l.D === "O" && l.S === "R" ? [PRODUCTS.mask_clay, "O"] : [PRODUCTS.mask_sheet, "D"]);
+
+  return picks.map(([p, r]) => view(p, r, c));
+}
+
+/** 카테고리별로 묶어 리포트에 넘긴다. 빈 카테고리는 나오지 않는다. */
+export function groupProducts(products: ProductView[]) {
+  return STEP_ORDER.map((g) => ({ group: g, items: products.filter((p) => p.group === g) })).filter(
+    (x) => x.items.length > 0,
+  );
 }
 
 function idolsOf(l: Letters, c: Copy): IdolView[] {

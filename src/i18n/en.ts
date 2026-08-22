@@ -241,9 +241,8 @@ export const en: Copy = {
     evening: "Evening", eveningSub: "Clear & repair — 8 to 10 minutes",
     productsTitle: "Matched for you",
     productsNote:
-      "Picked against your four letters, from Korean lines that actually move off the shelf in Myeongdong — not export-only labels. Prices indicative.",
-    affiliateNote:
-      "These are affiliate links: if you buy through them, I earn a small commission at no extra cost to you.",
+      "Eight products, chosen against your four letters — not a bestseller list. Every other type gets a different shelf, and each card says which of your letters put it there. Prices indicative.",
+    affiliateNote: "Some links are affiliate links. Your price is the same either way.",
     idolsTitle: "Borrowed from the idols",
     idolsNote:
       "Habits K-pop artists have described in interviews and beauty features — filtered down to the ones that make sense for this type. Method only: no photos, no endorsement.",
@@ -282,27 +281,66 @@ export const en: Copy = {
 
   productStep: {
     cleanse: "Cleanse", toner: "Toner", serum: "Serum", night: "Night active",
-    moisturiser: "Moisturiser", spf: "SPF", weekly: "Weekly",
+    moisturiser: "Moisturiser", spf: "Sunscreen", weekly: "Weekly treatment",
+  },
+
+  productStepNote: {
+    cleanse: "Everything downstream depends on this step being right for your barrier.",
+    toner: "In a Korean routine the toner is a treatment layer, not a wipe-down.",
+    serum: "The one step aimed squarely at your dominant concern.",
+    night: "Repair happens while you sleep. This is where the real change comes from.",
+    moisturiser: "Weight matters more than brand here — too heavy congests, too light leaks.",
+    spf: "The highest-return product in your routine, on every one of the sixteen types.",
+    weekly: "Once or twice a week, to keep the daily steps working.",
+  },
+
+  productReason: {
+    D: "Because your barrier runs dry",
+    O: "Because you produce real sebum",
+    S: "Because your skin reacts before it tolerates",
+    R: "Because your barrier can take it",
+    P: "Because you hold pigment",
+    N: "Because your tone stays even",
+    W: "Because lines are already setting",
+    T: "Because you are still in the prevention window",
+    all: "Everyone. Every type.",
   },
 
   productWhy: {
-    cleanse_dry: "Low-pH, non-stripping — leaves the barrier lipids where they belong.",
-    cleanse_oil: "Dissolves sebum and SPF without the squeak that triggers rebound oil.",
-    toner_hydra: "Houttuynia cordata calms low-grade redness while it hydrates.",
-    toner_exfo: "A gentle daily acid blend that keeps congestion from becoming a spot.",
-    serum_hydra: "Five weights of hyaluronic acid — hydration that reaches past the surface.",
-    serum_cica: "Centella for a barrier that flares before it tolerates.",
-    serum_bright: "2% niacinamide interrupts pigment transfer before a mark sets.",
-    serum_vitc: "A stable vitamin C derivative — brightening without the sting.",
-    serum_retinal: "Retinal works faster than retinol at the same irritation cost.",
-    serum_ferment: "Fermented yeast ferment filtrate — Korea's long-standing answer to firmness.",
-    cream_rich: "Ceramide-dominant and unscented — the dry-barrier workhorse.",
-    cream_light: "Gel-cream weight: seals moisture without adding to the shine.",
-    cream_barrier: "Mineral-water base with a light lipid seal — calm, not heavy.",
-    spf_all: "The most-worn Korean chemical filter for a reason — no cast, no film.",
-    spf_oily: "Watery finish that sits under makeup without pilling on oily skin.",
-    mask_sheet: "The sheet mask idols actually keep in the fridge by the box.",
-    mask_clay: "Jeju clay pulls congestion out of pores without over-drying the rest.",
+    cleanse_dry:
+      "Your barrier is already short on lipids, so the wrong cleanser undoes the whole routine before it starts. This one sits at skin pH and lifts the day off without taking the fats with it — you step out of the bathroom comfortable instead of tight, which is the first thing that changes for dry skin.",
+    cleanse_oil:
+      "Strip an oily face and it answers by making more oil an hour later. This milk texture dissolves sebum and sunscreen and then stops, so you get properly clean without the squeak that starts the rebound cycle. Shine at 4pm goes down over a few weeks, not overnight.",
+    toner_hydra:
+      "Reactive skin does better with a toner that treats rather than one that tightens. Heartleaf extract at 77% takes the heat out of low-grade redness while it hydrates, so you can layer actives on top of a calm base instead of an already-irritated one.",
+    toner_exfo:
+      "Your barrier tolerates acids, so a daily low-dose blend is the cheapest way to stop congestion becoming a spot. Three acid types work at three depths at once — it keeps pores clear without the sting of a weekly strong peel, and texture smooths out in about a month.",
+    serum_hydra:
+      "Hydration is the step most people get wrong by using one heavy layer. Five molecular weights of hyaluronic acid reach different depths at the same time, so water goes where it is actually missing instead of sitting on the surface and evaporating.",
+    serum_cica:
+      "When skin flares before it tolerates, the fix is not a gentler version of the same thing — it is centella, which calms the reaction itself. This is the serum that lets a sensitive face finally build a routine, because it stops the cycle of reacting, retreating and starting over.",
+    serum_bright:
+      "Your skin answers inflammation with pigment, and once a mark sets it takes months. Niacinamide at 2% interrupts the transfer before it happens, so you are stopping marks rather than fading them. Propolis handles the healing alongside it.",
+    serum_vitc:
+      "You mark strongly, so you need the corrective end of the range, not the gentle one. This is a stabilised vitamin C derivative — it does the brightening work of pure ascorbic acid without the sting or the oxidation, which means you can actually keep using it long enough to see the change.",
+    serum_retinal:
+      "Retinal converts to retinoic acid in one step instead of two, so it works measurably faster than retinol at the same irritation cost. Your barrier can take it, which means you can go straight to the effective ingredient rather than spending six months building up to it.",
+    serum_ferment:
+      "You need collagen support but your skin reacts to the usual retinoids. Fermented yeast filtrate is Korea's long answer to exactly that problem — firmness without the purge, applied nightly rather than cautiously twice a week.",
+    cream_rich:
+      "A dry barrier does not need more water, it needs the lipids to hold water in. This is ceramide-dominant and completely unscented, and it is what estheticians reach for when a face is flaking under makeup — the change shows in about four days.",
+    cream_light:
+      "Skipping moisturiser because you are oily is what makes you oilier — dehydrated skin compensates with sebum. This gel weight seals without adding a single point of shine, which is the compromise oily skin usually cannot find.",
+    cream_barrier:
+      "Sensitive skin usually gets pushed toward heavy creams that congest. This one is mineral-water based with a light lipid seal — it calms without weight, so you keep the barrier fed without giving yourself something new to react to.",
+    spf_all:
+      "This is the product that outperforms everything else in your routine, so it has to be one you will actually wear every day. No white cast, no film, nothing that pills under makeup — it is the most-worn Korean filter for exactly that reason.",
+    spf_oily:
+      "Most sunscreens fail on oily skin by pilling or sliding by noon. This one has a watery finish that sets and stays put under makeup, which turns sunscreen from a daily negotiation into something you stop thinking about.",
+    mask_sheet:
+      "The single habit that separates idol skin from everyone else's is not a product, it is frequency. Keep these cold in the fridge and the ten minutes stops feeling like effort — that is the whole trick, and it works on your type because your barrier wants volume of hydration, not weight.",
+    mask_clay:
+      "Your combination of oil and a resilient barrier is exactly what clay is for. Jeju volcanic clay pulls congestion out of the pore without over-drying the rest of the face, once or twice a week — enough to keep pores from closing over, not enough to trigger rebound oil.",
   },
 
   idolCopy: {
