@@ -7,11 +7,9 @@ echo   Idol Skin Lab - push to GitHub
 echo ==========================================
 echo.
 
-if exist ".git\index.lock" (
-  echo [clean] removing stale index.lock
-  del /f /q ".git\index.lock" >nul 2>&1
-)
+if exist ".git\index.lock" del /f /q ".git\index.lock" >nul 2>&1
 if exist ".git\HEAD.lock" del /f /q ".git\HEAD.lock" >nul 2>&1
+if exist ".git\config.lock" del /f /q ".git\config.lock" >nul 2>&1
 if exist ".git\objects" (
   for /r ".git\objects" %%f in (tmp_obj*) do @del /f /q "%%f" >nul 2>&1
 )
@@ -29,6 +27,10 @@ git commit -m "%MSG%"
 if errorlevel 1 echo   (no new changes - will still push pending commits)
 echo.
 
+REM Has this branch ever been pushed? If not, the first push must set upstream.
+git rev-parse --abbrev-ref --symbolic-full-name @{u} >nul 2>&1
+if errorlevel 1 goto FIRSTPUSH
+
 echo [3/4] sync with remote
 git fetch origin
 git merge --no-edit -X ours origin/main
@@ -44,7 +46,17 @@ echo.
 echo [4/4] push
 git push
 if errorlevel 1 goto FAILED
+goto OK
 
+:FIRSTPUSH
+echo [3/4] first push - linking local main to origin/main
+echo.
+echo   A GitHub login window may open. Sign in as dbsqja9288.
+echo.
+git push -u origin main
+if errorlevel 1 goto FAILED
+
+:OK
 echo.
 git status -sb
 echo.
@@ -60,6 +72,11 @@ echo.
 echo ==========================================
 echo   PUSH FAILED - show this screen to Claude
 echo ==========================================
+echo.
+echo   Most common causes:
+echo     - the GitHub repo was created WITH a README
+echo       (it must be completely empty)
+echo     - login was cancelled
 echo.
 pause
 exit /b 1
