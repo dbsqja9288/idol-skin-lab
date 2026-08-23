@@ -8,9 +8,10 @@
  *   댓글  — 게시 직후 첫 댓글로 링크가 달린다. (social-post.mjs가 자동으로)
  *   사진  — 테마별 브랜드 카드가 붙는다. 끄려면 THREADS_IMAGES=off
  *
- * ⚠️ 보이스 규칙 — 브랜드의 화자(관리실 스토리텔링 캐릭터)로 말하되,
- *    검증 가능한 가짜 경력("12년", "청담", 실명 고객)은 쓰지 않는다.
- *    관찰·의견·습관("내가 제일 먼저 묻는 것", "매번 보는 실수")은 된다.
+ * ⚠️ 보이스 규칙 — 화자는 실제 운영자(청담에서 12년간 아이돌 피부·메이크업을
+ *    맡아온 전문가, 본인 동의하에 운영 참여)다. "12년", "청담"은 실제 경력이라 쓴다.
+ *    단, 실제 경력을 넘어서는 주장(실명 고객, 특정 아이돌 이름, 없는 수상 이력)은
+ *    절대 쓰지 않는다. 관찰·의견·습관 화법은 자유.
  *
  * 문안을 바꾸려면 이 파일만 고치면 된다.
  */
@@ -52,12 +53,12 @@ const EN = {
   quiz: {
     label: "Skin type quiz",
     posts: [
-      { id: "guess-shelf", text: `I can usually guess someone's bathroom shelf from two answers.\n\nNot because I'm psychic — because "dry" and "sensitive" get treated like the same problem, and they never are. Korean estheticians read four separate axes: oil, reactivity, pigment, firmness.\n\nSixteen types. Most people are treating the wrong one.` },
+      { id: "guess-shelf", text: `Twelve years reading idol skin in Cheongdam, and I can usually guess someone's bathroom shelf from two answers.\n\nNot because I'm psychic — because "dry" and "sensitive" get treated like the same problem, and they never are. Korean estheticians read four separate axes: oil, reactivity, pigment, firmness.\n\nSixteen types. Most people are treating the wrong one.` },
       { id: "two-hours", text: `My favourite skincare question is one almost nobody asks themselves.\n\nTwo hours after cleansing, with nothing on your face — how does it feel?\n\nTight-and-flaking is a completely different product list from comfortable-with-a-glow. That single answer moves half the routine.` },
       { id: "mark", text: `I always ask what a spot leaves behind after it heals.\n\nNothing → spend your budget on texture.\nA brown mark that stays for months → sunscreen is your treatment, not your afterthought.\n\nSame breakout. Opposite routines.` },
       { id: "combination", text: `"Combination skin" is the least useful phrase in beauty, and I'll die on this hill.\n\nIt has never once helped anyone decide what to put on their face tonight. Four axes instead of four labels gives you sixteen types — and a routine that actually names products.` },
       { id: "sixteen", text: `The four-letter thing sounds like a gimmick until you watch it work.\n\nD/O — how much oil your barrier makes\nS/R — whether it reacts before it tolerates\nP/N — what a healed spot leaves behind\nW/T — where you sit on firmness\n\nSixteen types, not four. Which letters are you?` },
-      { id: "built-it", text: `I built the skin consultation I always wished existed: ninety seconds, ten questions, nothing to sign up for.\n\nAt the end — your four letters, an AM/PM layering order, and the Korean formulas matched to your barrier, with the reason for each one.` },
+      { id: "built-it", text: `I've spent twelve years giving this consultation in person, in a studio in Cheongdam. So I built the version I always wished existed: ninety seconds, ten questions, nothing to sign up for.\n\nAt the end — your four letters, an AM/PM layering order, and the Korean formulas matched to your barrier, with the reason for each one.` },
       { id: "wrong-half", text: `The two mistakes I see most often:\n\nCalling yourself sensitive when you're actually dry. Calling yourself oily when you're actually dehydrated.\n\nBoth send you to the wrong half of the shelf for years.` },
       { id: "not-a-mood", text: `Your skin isn't a mood. I keep saying this.\n\nIt's four measurements — and once you know which side of each axis you're on, the product aisle stops being a guessing game and starts being a filter.` },
     ],
@@ -65,10 +66,10 @@ const EN = {
   routine: {
     label: "Layering",
     posts: [
-      { id: "thinnest", text: `The thing that actually makes Korean routines work isn't the number of steps. I promise.\n\nIt's viscosity. Thinnest first, always. Watery essence before serum, serum before cream. Put the cream on first and everything above it is decoration.` },
+      { id: "thinnest", text: `Twelve years prepping skin for cameras taught me this: what makes Korean routines work isn't the number of steps. I promise.\n\nIt's viscosity. Thinnest first, always. Watery essence before serum, serum before cream. Put the cream on first and everything above it is decoration.` },
       { id: "seven-layers", text: `People ask how idol skin looks lit from inside instead of coated.\n\nSeven thin layers beat one thick one. Pat a watery essence in until it absorbs, then go again — the volume of hydration without the weight.` },
       { id: "oily-moisturiser", text: `Every time someone tells me they skip moisturiser because they're oily, I age a year.\n\nDehydrated skin compensates by making more sebum. Gel-cream weight, every night. The shine you're fighting is partly the fix you skipped.` },
-      { id: "sixty-seconds", text: `The step I refuse to negotiate on: oil cleanse on DRY skin, sixty seconds, before any water touches your face.\n\nSunscreen isn't water-soluble. Go straight to the foaming wash and you're spreading it around, not removing it.` },
+      { id: "sixty-seconds", text: `Twelve years of doing idol makeup means twelve years of taking it OFF. The step I refuse to negotiate on: oil cleanse on DRY skin, sixty seconds, before any water touches your face.\n\nSunscreen isn't water-soluble. Go straight to the foaming wash and you're spreading it around, not removing it.` },
       { id: "squeaky", text: `If your face squeaks after washing, we need to talk.\n\nSqueaky means the cleanser stripped the lipids your barrier spent all night making. Low pH, no sulfates — and stop before it feels tight.` },
       { id: "one-at-a-time", text: `The advice nobody wants and everybody needs: one new product at a time, two weeks apart.\n\nAdd three at once and your face reacts — now you have to remove all three and start over. Slow is the fast way here.` },
       { id: "ph", text: `The number that decides whether a cleanser helps or hurts you is printed on the back, in small type.\n\nYour skin sits around pH 5. A cleanser at pH 9 strips it and takes hours to recover from. Low-pH isn't a marketing word — it's the whole difference.` },
@@ -78,8 +79,8 @@ const EN = {
   spf: {
     label: "Sunscreen",
     posts: [
-      { id: "one-product", text: `If I could only keep one product from my entire shelf, it wouldn't be a serum.\n\nSunscreen outperforms everything layered above it, and it's the only step that works on all sixteen skin types. Two fingers' worth. Reapplied.` },
-      { id: "teens", text: `The faces that stop me are the ones that started SPF at fifteen.\n\nMost photodamage is banked before twenty — which is why "I use SPF now" and "I've used it since my teens" look visibly different at thirty-five, even on the same routine today.` },
+      { id: "one-product", text: `Twelve years in this job, and if I could only keep one product from my entire shelf, it wouldn't be a serum.\n\nSunscreen outperforms everything layered above it, and it's the only step that works on all sixteen skin types. Two fingers' worth. Reapplied.` },
+      { id: "teens", text: `After twelve years of looking at faces up close for a living, the ones that stop me are the ones that started SPF at fifteen.\n\nMost photodamage is banked before twenty — which is why "I use SPF now" and "I've used it since my teens" look visibly different at thirty-five, even on the same routine today.` },
       { id: "pigment", text: `If your spots heal into brown marks that stay for months, hear me out: sunscreen isn't skincare for you. It's the treatment.\n\nYour melanocytes fire at any provocation. Prevention is cheap. Correction takes a year.` },
       { id: "no-cast", text: `I remember when wearing sunscreen felt like a punishment. Korean formulas ended that.\n\nNo white cast, no tacky film, nothing that pills under makeup. Once it stops feeling like a chore, you actually wear it — which was the whole point.` },
       { id: "reapply", text: `Applying sunscreen once at 8am and calling yourself protected is like brushing your teeth on Monday for the week.\n\nReapplication is the part disciplined routines get right and everyone else skips.` },
@@ -96,8 +97,8 @@ const EN = {
       { id: "cold-first", text: `Cold first, product second.\n\nIce water before an early morning does more for a puffy face in three minutes than any de-puffing serum does in three weeks. It's free. It's what actually gets used.` },
       { id: "remove-first", text: `Nothing you apply matters if the day is still on your face. I'll say it as many times as it takes.\n\nMakeup, SPF, sebum — an oil melt, then a low-pH wash, before a single treatment step goes on.` },
       { id: "fridge", text: `The sheet masks live in the fridge, by the box. Not as a luxury — as friction removal.\n\nIf grabbing one takes four seconds, you use it on the tired nights too. That's the entire trick.` },
-      { id: "consistency", text: `Idols don't have better skin than you. They have someone reading it correctly every week and adjusting.\n\nThe products are mostly ones you can already buy. The difference is that nothing is guesswork.` },
-      { id: "calendar", text: `Backstage, nobody is doing anything exotic.\n\nOrdinary things, done at a frequency most people never reach. That's the entire gap — not the shelf, the calendar.` },
+      { id: "consistency", text: `I've done idol skin in Cheongdam for twelve years, so believe me on this: they don't have better skin than you. They have someone reading it correctly every week and adjusting.\n\nThe products are mostly ones you can already buy. The difference is that nothing is guesswork.` },
+      { id: "calendar", text: `Twelve years backstage, and I can tell you: nobody is doing anything exotic.\n\nOrdinary things, done at a frequency most people never reach. That's the entire gap — not the shelf, the calendar.` },
       { id: "removal", text: `The part nobody posts: most of what happens before a comeback is removal, not addition.\n\nCut the actives fighting each other. Cut the fragrance. Pull exfoliation back to twice a week. The skin calms down — and the camera is kind.` },
     ],
   },
@@ -110,12 +111,12 @@ const ES = {
   quiz: {
     label: "Test de tipo de piel",
     posts: [
-      { id: "adivinar", text: `Casi siempre puedo adivinar el estante del baño de alguien con dos respuestas.\n\nNo es magia: es que «seca» y «sensible» se tratan como el mismo problema, y nunca lo son. En Corea la piel se lee en cuatro ejes: grasa, reactividad, pigmento, firmeza.\n\nDieciséis tipos. La mayoría trata el equivocado.` },
+      { id: "adivinar", text: `Doce años leyendo la piel de idols en Cheongdam, y casi siempre puedo adivinar el estante del baño de alguien con dos respuestas.\n\nNo es magia: es que «seca» y «sensible» se tratan como el mismo problema, y nunca lo son. En Corea la piel se lee en cuatro ejes: grasa, reactividad, pigmento, firmeza.\n\nDieciséis tipos. La mayoría trata el equivocado.` },
       { id: "dos-horas", text: `Mi pregunta favorita de skincare es una que casi nadie se hace.\n\nDos horas después de limpiarte la cara, sin nada puesto, ¿cómo la notas?\n\nTirante-y-descamada es una lista de productos opuesta a cómoda-con-brillo. Esa sola respuesta decide media rutina.` },
       { id: "marca", text: `Siempre pregunto qué deja atrás un grano cuando por fin se cura.\n\nNada → invierte en textura.\nUna marca marrón que dura meses → el protector solar es tu tratamiento, no un extra.\n\nEl mismo grano. Rutinas opuestas.` },
       { id: "mixta", text: `«Piel mixta» es la frase menos útil de toda la cosmética, y lo sostengo.\n\nNo ha ayudado nunca a nadie a decidir qué ponerse en la cara esta noche. Cuatro ejes en vez de cuatro etiquetas dan dieciséis tipos — y una rutina que sí nombra productos.` },
       { id: "dieciseis", text: `Lo de las cuatro letras suena a truco hasta que lo ves funcionar.\n\nD/O — cuánta grasa fabrica tu barrera\nS/R — si reacciona antes de tolerar\nP/N — qué deja atrás un grano curado\nW/T — dónde estás en firmeza\n\n¿Cuáles son las tuyas?` },
-      { id: "la-construi", text: `Construí la consulta de piel que siempre quise que existiera: noventa segundos, diez preguntas, sin registro.\n\nAl final — tus cuatro letras, un orden de capas para mañana y noche, y las fórmulas coreanas que le corresponden a tu barrera, con el porqué de cada una.` },
+      { id: "la-construi", text: `Llevo doce años haciendo esta consulta en persona, en un estudio de Cheongdam. Así que construí la versión que siempre quise que existiera: noventa segundos, diez preguntas, sin registro.\n\nAl final — tus cuatro letras, un orden de capas para mañana y noche, y las fórmulas coreanas que le corresponden a tu barrera, con el porqué de cada una.` },
     ],
   },
   routine: {
@@ -148,7 +149,7 @@ const ES = {
       { id: "frio-primero", text: `Primero el frío, después el producto.\n\nAgua helada antes de un madrugón hace más por una cara hinchada en tres minutos que cualquier sérum en tres semanas. Es gratis. Es lo que de verdad se usa.` },
       { id: "retirar", text: `Nada de lo que te apliques importa si el día sigue en tu cara. Lo repetiré las veces que haga falta.\n\nMaquillaje, protector, sebo — aceite que lo disuelve y después pH bajo, antes de un solo paso de tratamiento.` },
       { id: "nevera", text: `Las mascarillas viven en la nevera, por cajas. No como lujo: para quitar fricción.\n\nSi cogerla tarda cuatro segundos, también la usas las noches de cansancio. Ese es todo el truco.` },
-      { id: "constancia", text: `Las idols no tienen mejor piel que tú. Tienen a alguien que se la lee bien cada semana y ajusta.\n\nLos productos son casi todos los que ya puedes comprar. La diferencia es que nada se deja al azar.` },
+      { id: "constancia", text: `Doce años cuidando piel de idols en Cheongdam me enseñaron esto: no tienen mejor piel que tú. Tienen a alguien que se la lee bien cada semana y ajusta.\n\nLos productos son casi todos los que ya puedes comprar. La diferencia es que nada se deja al azar.` },
     ],
   },
 };
