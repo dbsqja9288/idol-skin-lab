@@ -3,7 +3,8 @@
  *
  * 글의 구조:
  *   1) 본문 게시 — 테마별 브랜드 카드 이미지 첨부 (실패하면 텍스트로 자동 전환)
- *   2) 2초 뒤, 그 글의 **첫 댓글로 링크**를 단다
+ *   2) 짧은 댓글 2개를 체인으로 단다 (혼잣말 광고처럼 안 보이게)
+ *   3) 마지막 세 번째 댓글에 링크
  *      (본문에 링크를 넣으면 광고처럼 읽혀서 도달이 깎인다 — 댓글 링크가 스레드의 관행)
  *
  * 문안·링크문구·카드 주소는 전부 scripts/variants.mjs 한 곳에서 온다.
@@ -84,7 +85,8 @@ console.log("─".repeat(50));
 console.log(v.text);
 console.log("─".repeat(50));
 console.log(`카드: ${IMAGES_ON ? v.image : "(끔)"}`);
-console.log(`댓글: ${REPLY_ON ? v.reply : "(끔)"}`);
+if (REPLY_ON) v.replies.forEach((r, i) => console.log(`댓글 ${i + 1}: ${r.replace(/\n/g, " / ")}`));
+else console.log("댓글: (끔)");
 
 if (!USER_ID || !TOKEN) {
   console.log("\n토큰이 없어 초안만 출력했습니다 (dry-run).");
@@ -120,9 +122,13 @@ try {
   console.log(`\n본문 게시 완료 [${v.lang}/${v.theme}/${v.id}]: ${mainId} (카드 ${image ? "첨부" : "없음"})`);
 
   if (REPLY_ON) {
-    await new Promise((r) => setTimeout(r, 2000));
-    const replyId = await publish({ text: v.reply, replyTo: mainId });
-    console.log(`댓글 링크 완료: ${replyId}`);
+    // 댓글 체인: 각 댓글이 직전 댓글에 이어 달린다. 마지막 댓글이 링크.
+    let prev = mainId;
+    for (let i = 0; i < v.replies.length; i++) {
+      await new Promise((r) => setTimeout(r, 2500));
+      prev = await publish({ text: v.replies[i], replyTo: prev });
+      console.log(`댓글 ${i + 1}/${v.replies.length} 완료: ${prev}`);
+    }
   }
 } catch (e) {
   console.error("\n실패:", e.message);

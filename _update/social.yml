@@ -1,0 +1,68 @@
+name: Threads 자동 게시
+
+# 하루 96회, 15분 간격(UTC).
+#
+# 언어는 시각으로 갈린다 — 영어 64회 + 스페인어 32회 (시간당 4회).
+# 어느 시각이 어느 언어인지는 scripts/variants.mjs 의 ES_HOURS 한 줄에 있다.
+#
+#   스페인어 (UTC 02·04·07·12·15·17·20·22 — 각 :00 :15 :30 :45)
+#     스페인 저녁과 멕시코·중남미 저녁에 맞췄다.
+#   영어 (나머지 16시간 × 4회)
+#     미국 동부 기준 출근길·점심·퇴근길·취침 전이 모두 들어간다.
+#
+# 문안 풀은 영어 32개 / 스페인어 24개다. 하루 소비량이 풀보다 크므로
+# 영어는 같은 글이 하루 두 번(≈12시간 간격), 스페인어는 하루 한두 번 나간다.
+# 풀을 늘리면 반복 간격이 자동으로 벌어진다 — variants.mjs에 문안만 추가하면 된다.
+#
+# 스레드 API 한도: 게시물 250개/24h, 댓글 1,000개/24h.
+# 본문 96 + 댓글 288(96×3)이라 둘 다 한도 안이다.
+# 진짜 상한은 API가 아니라 사람이 질리는 속도이므로, 지표를 보고 조정한다.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: # 수동 실행 버튼
+    inputs:
+      lang:
+        description: "언어 (비워두면 시각에 따라 자동)"
+        required: false
+        type: choice
+        options: ["", "en", "es"]
+        default: ""
+      theme:
+        description: "주제 (비워두면 순서대로 자동)"
+        required: false
+        type: choice
+        options: ["", "quiz", "routine", "spf", "idols"]
+        default: ""
+      post_id:
+        description: "문구 id (비워두면 순서대로 자동)"
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  threads:
+    name: 스레드
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: 스레드 게시
+        env:
+          THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          # 도메인을 사면 이 변수만 갱신하면 된다.
+          SITE_URL: ${{ vars.SITE_URL || 'https://idol-skin-lab.vercel.app' }}
+          # LANG 은 리눅스 예약 환경변수라 이름을 따로 쓴다
+          LANG_OVERRIDE: ${{ inputs.lang }}
+          THEME: ${{ inputs.theme }}
+          POST_ID: ${{ inputs.post_id }}
+        shell: bash
+        run: |
+          # pipefail이 없으면 node가 죽어도 tee의 성공 코드로 덮여 실패가 감춰진다
+          set -o pipefail
+          node scripts/social-post.mjs | tee -a "$GITHUB_STEP_SUMMARY"

@@ -1,12 +1,13 @@
 /**
  * 소셜 문안 한 곳에서 관리하기.
  *
- * 하루 24회 — 영어 16회 + 스페인어 8회. 시각(UTC)으로 언어가 갈린다.
+ * 하루 96회 — 영어 64회 + 스페인어 32회. 15분 간격, 시각(UTC)으로 언어가 갈린다.
  *
  * 글의 구조 (스팸으로 안 보이게 하기 위한 설계):
- *   본문  — 1인칭 후킹으로 시작, 링크 없음. 호기심만 남긴다.
- *   댓글  — 게시 직후 첫 댓글로 링크가 달린다. (social-post.mjs가 자동으로)
- *   사진  — 테마별 브랜드 카드가 붙는다. 끄려면 THREADS_IMAGES=off
+ *   본문    — 1인칭 후킹으로 시작, 링크 없음. 호기심만 남긴다.
+ *   댓글 1·2 — 짧은 후속 코멘트 두 개가 스레드로 이어진다 (대화가 있어 보이게).
+ *   댓글 3  — 마지막에 링크가 달린다. (social-post.mjs가 자동으로)
+ *   사진    — 테마별 브랜드 카드가 붙는다. 끄려면 THREADS_IMAGES=off
  *
  * ⚠️ 보이스 규칙 — 화자는 실제 운영자(청담에서 12년간 아이돌 피부·메이크업을
  *    맡아온 전문가, 본인 동의하에 운영 참여)다. "12년", "청담"은 실제 경력이라 쓴다.
@@ -18,16 +19,19 @@
 
 const SITE = (process.env.SITE_URL || "https://idol-skin-lab.vercel.app").replace(/\/+$/, "");
 
-/** 언어별 게시 시각 (UTC). 나머지 16칸이 영어다. */
+/** 언어별 게시 시각 (UTC). 나머지 16칸이 영어다. 각 시각에 15분 간격으로 4회씩 나간다. */
 const ES_HOURS = [2, 4, 7, 12, 15, 17, 20, 22];
+const SLOTS_PER_HOUR = 4; // :00 :15 :30 :45
 
 export function langForHour(hour) {
   return ES_HOURS.includes(hour) ? "es" : "en";
 }
 
-function slotIndex(hour, lang) {
+function slotIndex(hour, minute, lang) {
   const hours = lang === "es" ? ES_HOURS : Array.from({ length: 24 }, (_, h) => h).filter((h) => !ES_HOURS.includes(h));
-  return hours.indexOf(hour);
+  const hi = hours.indexOf(hour);
+  const quarter = Math.min(SLOTS_PER_HOUR - 1, Math.max(0, Math.floor(minute / 15)));
+  return hi < 0 ? 0 : hi * SLOTS_PER_HOUR + quarter;
 }
 
 /** 첫 댓글에 달릴 링크 문구 — 테마별로 달라서 매번 같은 댓글이 반복되지 않는다 */
@@ -43,6 +47,49 @@ const REPLY = {
     routine: (u) => `El orden de capas para tu tipo exacto (gratis, 90 seg):\n${u}/es`,
     spf: (u) => `Descubre cuál de los dieciséis tipos eres — gratis, sin registro:\n${u}/es/type`,
     idols: (u) => `La versión de 90 segundos de esa consulta, gratis:\n${u}/es`,
+  },
+};
+
+/**
+ * 링크 전에 달리는 짧은 후속 댓글 2개 — 본문 게시 직후 스레드로 이어진다.
+ * 혼자 떠드는 티가 안 나게, 본문에서 못다 한 한 줄 + 개인적 습관/의견으로 구성.
+ */
+const REPLY_EXTRAS = {
+  en: {
+    quiz: [
+      `The four axes, if you want to self-check tonight: oil, reactivity, pigment, firmness. Most product labels only speak to the first one.`,
+      `I misread my own skin for years — treated "sensitive" when the real problem was dry. The letters are what fixed it.`,
+    ],
+    routine: [
+      `If you only change one thing this week: reorder what you already own, thinnest to thickest. Costs nothing.`,
+      `And give it two weeks before you judge. Skin answers in fortnights, not mornings.`,
+    ],
+    spf: [
+      `Two fingers' worth for the face. Everyone I've ever checked was using about a third of that.`,
+      `Cloudy days count. UVA doesn't care about the weather — it barely drops.`,
+    ],
+    idols: [
+      `None of this needs a dressing room. The habits travel better than the products do.`,
+      `The tired-night version of a routine is the one that decides your skin. Design for that night, not your best one.`,
+    ],
+  },
+  es: {
+    quiz: [
+      `Los cuatro ejes, por si quieres autoevaluarte esta noche: grasa, reactividad, pigmento, firmeza. Las etiquetas solo hablan del primero.`,
+      `Yo leí mal mi propia piel durante años — trataba «sensible» cuando el problema real era sequedad. Las letras lo arreglaron.`,
+    ],
+    routine: [
+      `Si solo cambias una cosa esta semana: reordena lo que ya tienes, de lo más ligero a lo más denso. No cuesta nada.`,
+      `Y dale dos semanas antes de juzgar. La piel responde en quincenas, no en mañanas.`,
+    ],
+    spf: [
+      `Dos dedos para la cara. Todas las personas que he revisado usaban como un tercio de eso.`,
+      `Los días nublados cuentan. A los rayos UVA el clima les da igual — apenas bajan.`,
+    ],
+    idols: [
+      `Nada de esto necesita un camerino. Los hábitos viajan mejor que los productos.`,
+      `La versión de noche-cansada de tu rutina es la que decide tu piel. Diseña para esa noche, no para la mejor.`,
+    ],
   },
 };
 
@@ -175,15 +222,16 @@ function flatten(lang) {
  * 어떤 글을 올릴지 고른다.
  * (날짜 × 하루개수 + 슬롯번호) % 풀크기 — 한 바퀴 다 돌기 전에는 반복이 없다.
  */
-export function pickPost({ lang, theme, postId, hour, day } = {}) {
+export function pickPost({ lang, theme, postId, hour, minute, day } = {}) {
   const now = new Date();
   const h = typeof hour === "number" ? hour : now.getUTCHours();
+  const m = typeof minute === "number" ? minute : now.getUTCMinutes();
   const useLang = lang && POOLS[lang] ? lang : langForHour(h);
 
   const pool = flatten(useLang);
-  const perDay = useLang === "es" ? ES_HOURS.length : 24 - ES_HOURS.length;
+  const perDay = (useLang === "es" ? ES_HOURS.length : 24 - ES_HOURS.length) * SLOTS_PER_HOUR;
   const dayIndex = typeof day === "number" ? day : Math.floor(now.getTime() / 86_400_000);
-  const slot = Math.max(0, slotIndex(h, useLang));
+  const slot = Math.max(0, slotIndex(h, m, useLang));
 
   let post = pool[(dayIndex * perDay + slot) % pool.length];
 
@@ -199,7 +247,9 @@ export function pickPost({ lang, theme, postId, hour, day } = {}) {
     id: post.id,
     /** 본문 — 링크 없음 */
     text: post.text,
-    /** 게시 직후 첫 댓글로 달릴 링크 문구 */
+    /** 본문 아래에 순서대로 달릴 댓글 체인 — 짧은 코멘트 2개, 마지막이 링크 */
+    replies: [...REPLY_EXTRAS[useLang][post.theme], REPLY[useLang][post.theme](SITE)],
+    /** (구버전 호환) 링크 댓글 하나만 */
     reply: REPLY[useLang][post.theme](SITE),
     /** 테마별 브랜드 카드 이미지 (사이트 public/cards/ 에서 서빙) */
     image: `${SITE}/cards/${useLang}-${post.theme}.jpg`,
