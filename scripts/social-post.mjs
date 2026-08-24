@@ -20,13 +20,34 @@
  * 토큰이 없으면 초안만 출력하고 정상 종료한다 — 설정 전에도 워크플로가 실패하지 않는다.
  */
 
-import { pickPost } from "./variants.mjs";
+import { pickPost, langForHour } from "./variants.mjs";
 
 const USER_ID = process.env.THREADS_USER_ID;
 const TOKEN = process.env.THREADS_ACCESS_TOKEN;
 const API = "https://graph.threads.net/v1.0";
 const IMAGES_ON = process.env.THREADS_IMAGES !== "off";
 const REPLY_ON = process.env.THREADS_REPLY_LINK !== "off";
+
+/**
+ * 게시 모드 — GitHub 저장소 Variables 의 POST_MODE 로 조절한다 (코드 수정 불필요).
+ *   warmup (기본): 신규 계정 워밍업. 하루 3회만 — EN 13:00·23:00, ES 22:00 (UTC).
+ *                  댓글은 링크 하나만 단다 (체인 없음 — 대량 게시 신호 줄이기).
+ *   full        : 하루 96회 전체 스케줄 + 댓글 3단 체인.
+ * 수동 실행(Run workflow)은 모드와 무관하게 항상 게시된다.
+ */
+const MODE = (process.env.POST_MODE || "warmup").trim().toLowerCase();
+const FORCED = process.env.FORCE_POST === "1";
+const WARMUP_HOURS = { en: [13, 23], es: [22] };
+
+if (MODE !== "full" && !FORCED) {
+  const h = new Date().getUTCHours();
+  const m = new Date().getUTCMinutes();
+  const ok = m < 15 && (WARMUP_HOURS[langForHour(h)] ?? []).includes(h);
+  if (!ok) {
+    console.log(`warmup 모드: 이 슬롯(UTC ${h}:${String(m).padStart(2, "0")})은 건너뜀. 하루 3회만 게시 중 — 전체 전환은 저장소 Variables에 POST_MODE=full.`);
+    process.exit(0);
+  }
+}
 
 /** 이미지 컨테이너는 처리에 시간이 걸리므로 준비될 때까지 확인한다 */
 async function waitReady(id, tries = 12) {
@@ -74,6 +95,8 @@ async function publish({ text, image, replyTo }) {
   return (await done.json()).id;
 }
 
+const CHAIN_ON = MODE === "full"; // 워밍업 중엔 링크 댓글 하나만
+
 const v = pickPost({
   lang: process.env.LANG_OVERRIDE?.trim() || undefined,
   theme: process.env.THEME?.trim() || undefined,
@@ -84,6 +107,9 @@ console.log(`[${v.lang.toUpperCase()}] ${v.label} / "${v.id}"  (UTC ${new Date()
 console.log("─".repeat(50));
 console.log(v.text);
 console.log("─".repeat(50));
+if (!CHAIN_ON) v.replies = [v.reply];
+
+console.log(`모드: ${MODE}${FORCED ? " (수동 실행)" : ""}`);
 console.log(`카드: ${IMAGES_ON ? v.image : "(끔)"}`);
 if (REPLY_ON) v.replies.forEach((r, i) => console.log(`댓글 ${i + 1}: ${r.replace(/\n/g, " / ")}`));
 else console.log("댓글: (끔)");

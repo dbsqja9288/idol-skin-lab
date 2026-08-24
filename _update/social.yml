@@ -55,6 +55,12 @@ jobs:
         env:
           THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
           THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          # warmup(기본): 하루 3회 + 링크 댓글 1개 — 신규 계정 스팸 분류 회피.
+          # 계정이 자리 잡으면 Settings → Secrets and variables → Actions → Variables 에
+          # POST_MODE=full 을 추가하면 하루 96회 + 댓글 체인으로 전환된다.
+          POST_MODE: ${{ vars.POST_MODE || 'warmup' }}
+          # 수동 실행(Run workflow)은 모드와 무관하게 항상 게시
+          FORCE_POST: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
           # 도메인을 사면 이 변수만 갱신하면 된다.
           SITE_URL: ${{ vars.SITE_URL || 'https://idol-skin-lab.vercel.app' }}
           # LANG 은 리눅스 예약 환경변수라 이름을 따로 쓴다
