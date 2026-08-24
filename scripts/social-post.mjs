@@ -31,8 +31,9 @@ const REPLY_ON = process.env.THREADS_REPLY_LINK !== "off";
 /**
  * 게시 모드 — GitHub 저장소 Variables 의 POST_MODE 로 조절한다 (코드 수정 불필요).
  *   warmup (기본): 신규 계정 워밍업. 하루 3회만 — EN 13:00·23:00, ES 22:00 (UTC).
- *                  댓글은 링크 하나만 단다 (체인 없음 — 대량 게시 신호 줄이기).
- *   full        : 하루 96회 전체 스케줄 + 댓글 3단 체인.
+ *                  댓글은 아예 안 단다 (외부 링크·자기 댓글 = 도달 감점 신호이므로
+ *                  팔로워가 붙기 전까지는 본문만). 링크는 프로필 bio가 담당한다.
+ *   full        : 하루 96회 전체 스케줄 + 댓글 3단 체인(마지막이 링크).
  * 수동 실행(Run workflow)은 모드와 무관하게 항상 게시된다.
  */
 const MODE = (process.env.POST_MODE || "warmup").trim().toLowerCase();
@@ -95,7 +96,7 @@ async function publish({ text, image, replyTo }) {
   return (await done.json()).id;
 }
 
-const CHAIN_ON = MODE === "full"; // 워밍업 중엔 링크 댓글 하나만
+const CHAIN_ON = MODE === "full"; // 워밍업 중엔 댓글을 아예 달지 않는다
 
 const v = pickPost({
   lang: process.env.LANG_OVERRIDE?.trim() || undefined,
@@ -107,12 +108,12 @@ console.log(`[${v.lang.toUpperCase()}] ${v.label} / "${v.id}"  (UTC ${new Date()
 console.log("─".repeat(50));
 console.log(v.text);
 console.log("─".repeat(50));
-if (!CHAIN_ON) v.replies = [v.reply];
+if (!CHAIN_ON) v.replies = []; // warmup: 본문만. 링크·자기 댓글은 도달 감점 신호.
 
 console.log(`모드: ${MODE}${FORCED ? " (수동 실행)" : ""}`);
 console.log(`카드: ${IMAGES_ON ? v.image : "(끔)"}`);
-if (REPLY_ON) v.replies.forEach((r, i) => console.log(`댓글 ${i + 1}: ${r.replace(/\n/g, " / ")}`));
-else console.log("댓글: (끔)");
+if (REPLY_ON && v.replies.length) v.replies.forEach((r, i) => console.log(`댓글 ${i + 1}: ${r.replace(/\n/g, " / ")}`));
+else console.log(`댓글: (없음 — ${REPLY_ON ? "warmup 모드는 본문만 올린다" : "THREADS_REPLY_LINK=off"})`);
 
 if (!USER_ID || !TOKEN) {
   console.log("\n토큰이 없어 초안만 출력했습니다 (dry-run).");
