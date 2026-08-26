@@ -17,7 +17,7 @@ export default function SiteChrome({ lang, children }: { lang: Lang; children: R
   const pathname = usePathname() || "/";
 
   /** 현재 경로에서 언어 접두어를 뗀 '순수 경로' */
-  const bare = lang === "en" ? pathname : pathname.replace(/^\/es/, "") || "/";
+  const bare = lang === "en" ? pathname : pathname.replace(new RegExp(`^/${lang}`), "") || "/";
   const rest = bare === "/" ? "" : bare;
 
   const nav = [

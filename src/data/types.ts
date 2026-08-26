@@ -2,7 +2,7 @@ export type AxisKey = "D" | "S" | "P" | "W";
 export type Band = "neg" | "mid" | "pos";
 export type Score = Record<AxisKey, number>;
 
-export type Lang = "en" | "es";
+export type Lang = "en" | "es" | "ko";
 
 /** 언어와 무관한 제품 정보. 설명(step/why)은 i18n에 있다. */
 export type Product = {

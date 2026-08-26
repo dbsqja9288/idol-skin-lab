@@ -1,4 +1,5 @@
 import type { Lang, Product } from "@/data/types";
+import { KO_PRODUCTS } from "@/data/ko-products";
 
 /**
  * 제휴 링크를 한 곳에서 만든다.
@@ -26,7 +27,7 @@ import type { Lang, Product } from "@/data/types";
 
 const env = (k: string) => process.env[k]?.trim() || "";
 
-export type StoreKey = "amazon" | "amazon_es" | "amazon_mx" | "oliveyoung" | "yesstyle" | "stylevana" | "coupang";
+export type StoreKey = "amazon" | "amazon_es" | "amazon_mx" | "oliveyoung" | "oliveyoung_kr" | "naver" | "yesstyle" | "stylevana" | "coupang";
 
 type Store = {
   label: string;
@@ -53,8 +54,12 @@ const STORES: Record<StoreKey, Store> = {
     env("NEXT_PUBLIC_YESSTYLE_PARAM")),
   stylevana: store("Stylevana", "https://www.stylevana.com/en_US/catalogsearch/result/?q={q}", "NEXT_PUBLIC_SEARCH_STYLEVANA",
     env("NEXT_PUBLIC_STYLEVANA_PARAM")),
-  coupang: store("Coupang", "https://www.coupang.com/np/search?q={q}", "NEXT_PUBLIC_SEARCH_COUPANG",
+  coupang: store("쿠팡", "https://www.coupang.com/np/search?q={q}", "NEXT_PUBLIC_SEARCH_COUPANG",
     env("NEXT_PUBLIC_COUPANG_PARAM")),
+  oliveyoung_kr: store("올리브영", "https://www.oliveyoung.co.kr/store/search/getSearchMain.do?query={q}", "NEXT_PUBLIC_SEARCH_OLIVEYOUNG_KR",
+    env("NEXT_PUBLIC_OLIVEYOUNG_KR_PARAM")),
+  naver: store("네이버쇼핑", "https://search.shopping.naver.com/search/all?query={q}", "NEXT_PUBLIC_SEARCH_NAVER",
+    env("NEXT_PUBLIC_NAVER_PARAM")),
 };
 
 /**
@@ -67,6 +72,9 @@ const STORES: Record<StoreKey, Store> = {
 const DEFAULT_ORDER: Record<Lang, StoreKey[]> = {
   en: ["amazon", "oliveyoung"],
   es: ["yesstyle", "oliveyoung", "stylevana"],
+  // 한국은 쿠팡이 압도적이다. 올리브영은 국내몰(kr)로 따로 잡는다 —
+  // global.oliveyoung.com은 해외배송용이라 한국 사용자에겐 맞지 않는다.
+  ko: ["coupang", "oliveyoung_kr", "naver"],
 };
 
 /** 환경변수로 덮어쓸 수 있다: NEXT_PUBLIC_STORES_ES="yesstyle,amazon_es,oliveyoung" */
@@ -89,19 +97,48 @@ export function storeLabel(key: StoreKey): string {
  *
  *   spf_all: { amazon: "https://www.amazon.com/dp/XXXXXXXX?tag=..." },
  */
-export const OVERRIDE: Partial<Record<string, Partial<Record<StoreKey, string>>>> = {};
+export const OVERRIDE: Partial<Record<string, Partial<Record<StoreKey, string>>>> = {
+  // ── 쿠팡파트너스 실제 링크를 여기에 붙인다 ──────────────────────────
+  // 파트너스에서 상품 링크를 만들면 link.coupang.com/a/XXXXXX 형태로 나온다.
+  // 그건 이미 추적 코드가 박힌 완성형 주소라 param을 따로 붙이면 안 되고,
+  // 아래처럼 통째로 넣으면 검색 링크 대신 그 주소가 쓰인다.
+  //
+  //   spf_all:     { coupang: "https://link.coupang.com/a/XXXXXX" },
+  //   cleanse_dry: { coupang: "https://link.coupang.com/a/YYYYYY" },
+  //
+  // 안 채운 제품은 자동으로 한글 검색 링크가 나가므로 하나씩 채워도 된다.
+};
 
-/** 검색어. 콜론·가운뎃점은 스토어 검색을 방해해서 뺀다. */
-function queryFor(p: Product): string {
-  return `${p.brand} ${p.name}`.replace(/[:·]/g, " ").replace(/\s+/g, " ").trim();
+/**
+ * 검색어. 콜론·가운뎃점은 스토어 검색을 방해해서 뺀다.
+ *
+ * 한국어판은 한글 검색어를 쓴다 — 쿠팡에서 "Round Lab 1025 Dokdo Cleanser"를 치면
+ * 결과가 거의 안 나오지만 "라운드랩 독도 클렌저"는 바로 나온다.
+ */
+function queryFor(p: Product, lang?: Lang): string {
+  const raw = (lang === "ko" && KO_PRODUCTS[p.key]?.q) || `${p.brand} ${p.name}`;
+  return raw.replace(/[:·]/g, " ").replace(/\s+/g, " ").trim();
 }
 
-export function linkFor(p: Product, key: StoreKey): string {
+/** 한국어판에서 보여줄 브랜드·제품명 (한글). 없으면 영문 그대로. */
+export function brandFor(p: Product, lang: Lang): string {
+  return (lang === "ko" && KO_PRODUCTS[p.key]?.brand) || p.brand;
+}
+export function nameFor(p: Product, lang: Lang): string {
+  return (lang === "ko" && KO_PRODUCTS[p.key]?.name) || p.name;
+}
+
+/** 한국어판에서 보여줄 가격 (원화). 없으면 기존 달러 표기를 그대로 쓴다. */
+export function priceFor(p: Product, lang: Lang): string {
+  return (lang === "ko" && KO_PRODUCTS[p.key]?.price) || p.price;
+}
+
+export function linkFor(p: Product, key: StoreKey, lang?: Lang): string {
   const fixed = OVERRIDE[p.key]?.[key];
   if (fixed) return fixed;
 
   const s = STORES[key];
-  const url = s.template.replace("{q}", encodeURIComponent(queryFor(p)));
+  const url = s.template.replace("{q}", encodeURIComponent(queryFor(p, lang)));
   if (!s.param) return url;
   return url + (url.includes("?") ? "&" : "?") + s.param;
 }

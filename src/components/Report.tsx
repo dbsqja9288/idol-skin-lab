@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import { groupProducts, type Report } from "@/lib/engine";
-import { activeStores, linkFor, storeLabel } from "@/lib/affiliate";
+import { activeStores, brandFor, linkFor, nameFor, priceFor, storeLabel } from "@/lib/affiliate";
 import { getCopy, path } from "@/i18n";
 import ShareRow from "./ShareRow";
 import AdSlot from "./AdSlot";
@@ -119,7 +119,7 @@ export default function ReportView({
             </div>
             <div className="prods">
               {items.map((p) => (
-                <ProductCard key={p.key} p={p} stores={stores} />
+                <ProductCard key={p.key} p={p} stores={stores} lang={report.lang} />
               ))}
             </div>
           </div>
@@ -158,7 +158,7 @@ export default function ReportView({
         </div>
         <div className="prods">
           {report.match.kit.map((p) => (
-            <ProductCard key={`kit-${p.key}`} p={p} stores={stores} />
+            <ProductCard key={`kit-${p.key}`} p={p} stores={stores} lang={report.lang} />
           ))}
         </div>
 
@@ -203,10 +203,11 @@ export default function ReportView({
 }
 
 function ProductCard({
-  p, stores,
+  p, stores, lang,
 }: {
   p: import("@/lib/engine").ProductView;
   stores: import("@/lib/affiliate").StoreKey[];
+  lang: import("@/data/types").Lang;
 }) {
   return (
     <article className="prod">
@@ -215,14 +216,14 @@ function ProductCard({
       </div>
       <div className="info">
         <p className="reason">{p.reason}</p>
-        <p className="brand">{p.brand}</p>
-        <p className="name">{p.name}</p>
+        <p className="brand">{brandFor(p, lang)}</p>
+        <p className="name">{nameFor(p, lang)}</p>
         <p className="why">{p.why}</p>
-        <p className="price">{p.price}</p>
+        <p className="price">{priceFor(p, lang)}</p>
       </div>
       <div className="shop">
         {stores.map((k) => (
-          <a key={k} href={linkFor(p, k)} target="_blank" rel="nofollow sponsored noopener">
+          <a key={k} href={linkFor(p, k, lang)} target="_blank" rel="nofollow sponsored noopener">
             {storeLabel(k)}
           </a>
         ))}
