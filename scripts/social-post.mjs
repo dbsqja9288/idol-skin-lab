@@ -1,21 +1,19 @@
 /**
- * 스레드(Threads) 자동 게시.
+ * 스레드(Threads) 자동 게시 — v3 (북미 재공략판)
  *
  * 글의 구조:
- *   1) 본문 게시 — 테마별 브랜드 카드 이미지 첨부 (실패하면 텍스트로 자동 전환)
- *   2) 짧은 댓글 2개를 체인으로 단다 (혼잣말 광고처럼 안 보이게)
- *   3) 마지막 세 번째 댓글에 링크
- *      (본문에 링크를 넣으면 광고처럼 읽혀서 도달이 깎인다 — 댓글 링크가 스레드의 관행)
+ *   1) 본문 게시 — 텍스트만. 이미지·링크 없음.
+ *      (브랜드 카드는 광고로 읽히고, 링크는 전 형식 중 인게이지먼트 최하위)
+ *   2) 2초 뒤, 댓글 하나 — 실제 진단 화면 캡처 + 참여 유도 캡션. 링크 없음.
+ *      이미지 접근이 안 되면 캡션만 텍스트로 단다.
  *
- * 문안·링크문구·카드 주소는 전부 scripts/variants.mjs 한 곳에서 온다.
+ * 문안·캡션·이미지 주소는 전부 scripts/variants.mjs 한 곳에서 온다.
  *
  * 환경변수:
  *   THREADS_USER_ID / THREADS_ACCESS_TOKEN / SITE_URL
- *   THREADS_IMAGES=off             (카드 없이 텍스트만 올리고 싶을 때)
- *   THREADS_REPLY_LINK=off         (댓글 링크를 끄고 싶을 때)
- *   LANG_OVERRIDE=en|es            (수동 지정. 없으면 UTC 시각으로 자동 — EN 16 / ES 8)
- *   THEME=quiz|routine|spf|idols   (수동 지정)
- *   POST_ID=two-hours              (수동 지정)
+ *   POST_MODE=warmup|full          (아래 참고. 기본 warmup)
+ *   THREADS_REPLY_LINK=off         (사진 댓글까지 끄고 본문만 올리고 싶을 때)
+ *   LANG_OVERRIDE=en|es / THEME / POST_ID  (수동 지정)
  *
  * 토큰이 없으면 초안만 출력하고 정상 종료한다 — 설정 전에도 워크플로가 실패하지 않는다.
  */
@@ -25,27 +23,25 @@ import { pickPost, langForHour } from "./variants.mjs";
 const USER_ID = process.env.THREADS_USER_ID;
 const TOKEN = process.env.THREADS_ACCESS_TOKEN;
 const API = "https://graph.threads.net/v1.0";
-const IMAGES_ON = process.env.THREADS_IMAGES !== "off";
 const REPLY_ON = process.env.THREADS_REPLY_LINK !== "off";
 
 /**
  * 게시 모드 — GitHub 저장소 Variables 의 POST_MODE 로 조절한다 (코드 수정 불필요).
- *   warmup (기본): 신규 계정 워밍업. 하루 3회만 — EN 13:00·23:00, ES 22:00 (UTC).
- *                  댓글은 아예 안 단다 (외부 링크·자기 댓글 = 도달 감점 신호이므로
- *                  팔로워가 붙기 전까지는 본문만). 링크는 프로필 bio가 담당한다.
- *   full        : 하루 96회 전체 스케줄 + 댓글 3단 체인(마지막이 링크).
+ *   warmup (기본): 하루 2회, 영어만 — UTC 13시(미 동부 아침 9시)·23시(저녁 7시), 정각 슬롯.
+ *                  스페인어는 당분간 쉰다 (영어 그래프부터 다시 세운다).
+ *   full        : 전체 스케줄(15분 간격, EN+ES). 계정이 자리 잡으면 전환.
  * 수동 실행(Run workflow)은 모드와 무관하게 항상 게시된다.
  */
 const MODE = (process.env.POST_MODE || "warmup").trim().toLowerCase();
 const FORCED = process.env.FORCE_POST === "1";
-const WARMUP_HOURS = { en: [13, 23], es: [22] };
+const WARMUP_HOURS = { en: [13, 23], es: [] };
 
 if (MODE !== "full" && !FORCED) {
   const h = new Date().getUTCHours();
   const m = new Date().getUTCMinutes();
   const ok = m < 15 && (WARMUP_HOURS[langForHour(h)] ?? []).includes(h);
   if (!ok) {
-    console.log(`warmup 모드: 이 슬롯(UTC ${h}:${String(m).padStart(2, "0")})은 건너뜀. 하루 3회만 게시 중 — 전체 전환은 저장소 Variables에 POST_MODE=full.`);
+    console.log(`warmup 모드: 이 슬롯(UTC ${h}:${String(m).padStart(2, "0")})은 건너뜀. 영어 하루 2회만 게시 중 — 전체 전환은 저장소 Variables에 POST_MODE=full.`);
     process.exit(0);
   }
 }
@@ -96,24 +92,30 @@ async function publish({ text, image, replyTo }) {
   return (await done.json()).id;
 }
 
-const CHAIN_ON = MODE === "full"; // 워밍업 중엔 댓글을 아예 달지 않는다
+// warmup은 영어 하루 2회 — 날짜×2 + (아침 0 / 밤 1) 순번으로 풀 32개를 16일에 한 바퀴 돈다.
+const warmupSeq = (() => {
+  if (MODE === "full") return undefined;
+  const now = new Date();
+  return Math.floor(now.getTime() / 86_400_000) * 2 + (now.getUTCHours() < 18 ? 0 : 1);
+})();
 
 const v = pickPost({
-  lang: process.env.LANG_OVERRIDE?.trim() || undefined,
+  lang: process.env.LANG_OVERRIDE?.trim() || (MODE !== "full" ? "en" : undefined),
   theme: process.env.THEME?.trim() || undefined,
   postId: process.env.POST_ID?.trim() || undefined,
+  seq: warmupSeq,
 });
 
-console.log(`[${v.lang.toUpperCase()}] ${v.label} / "${v.id}"  (UTC ${new Date().getUTCHours()}시)`);
+console.log(`[${v.lang.toUpperCase()}] ${v.label} / "${v.id}"  (UTC ${new Date().getUTCHours()}시, 모드 ${MODE}${FORCED ? "·수동" : ""})`);
 console.log("─".repeat(50));
 console.log(v.text);
 console.log("─".repeat(50));
-if (!CHAIN_ON) v.replies = []; // warmup: 본문만. 링크·자기 댓글은 도달 감점 신호.
-
-console.log(`모드: ${MODE}${FORCED ? " (수동 실행)" : ""}`);
-console.log(`카드: ${IMAGES_ON ? v.image : "(끔)"}`);
-if (REPLY_ON && v.replies.length) v.replies.forEach((r, i) => console.log(`댓글 ${i + 1}: ${r.replace(/\n/g, " / ")}`));
-else console.log(`댓글: (없음 — ${REPLY_ON ? "warmup 모드는 본문만 올린다" : "THREADS_REPLY_LINK=off"})`);
+if (REPLY_ON) {
+  console.log(`사진 댓글: ${v.photoReply.text}`);
+  console.log(`이미지: ${v.photoReply.image}`);
+} else {
+  console.log("댓글: (끔)");
+}
 
 if (!USER_ID || !TOKEN) {
   console.log("\n토큰이 없어 초안만 출력했습니다 (dry-run).");
@@ -121,41 +123,37 @@ if (!USER_ID || !TOKEN) {
 }
 
 try {
-  // 카드가 실제로 접근 가능한지 먼저 확인 — 안 되면 텍스트로 전환
-  let image = IMAGES_ON ? v.image : null;
-  if (image) {
+  // 1) 본문 — 텍스트만
+  const mainId = await publish({ text: v.text });
+  console.log(`\n본문 게시 완료 [${v.lang}/${v.theme}/${v.id}]: ${mainId}`);
+
+  // 2) 댓글 하나 — 화면 캡처 + 캡션 (이미지 접근 불가면 캡션만)
+  if (REPLY_ON) {
+    await new Promise((r) => setTimeout(r, 2500));
+
+    let image = v.photoReply.image;
     try {
       const probe = await fetch(image);
       const type = probe.headers.get("content-type") ?? "";
       if (!probe.ok || !type.startsWith("image/")) {
-        console.log(`이미지 접근 불가 (${probe.status} ${type}) — 텍스트로 전환`);
+        console.log(`이미지 접근 불가 (${probe.status} ${type}) — 캡션만 텍스트로`);
         image = null;
       }
     } catch (e) {
-      console.log(`이미지 확인 실패: ${e.message} — 텍스트로 전환`);
+      console.log(`이미지 확인 실패: ${e.message} — 캡션만 텍스트로`);
       image = null;
     }
-  }
 
-  let mainId;
-  try {
-    mainId = await publish({ text: v.text, image });
-  } catch (e) {
-    if (!image) throw e;
-    console.log(`이미지 게시 거부 — 텍스트로 재시도: ${e.message}`);
-    image = null;
-    mainId = await publish({ text: v.text });
-  }
-  console.log(`\n본문 게시 완료 [${v.lang}/${v.theme}/${v.id}]: ${mainId} (카드 ${image ? "첨부" : "없음"})`);
-
-  if (REPLY_ON) {
-    // 댓글 체인: 각 댓글이 직전 댓글에 이어 달린다. 마지막 댓글이 링크.
-    let prev = mainId;
-    for (let i = 0; i < v.replies.length; i++) {
-      await new Promise((r) => setTimeout(r, 2500));
-      prev = await publish({ text: v.replies[i], replyTo: prev });
-      console.log(`댓글 ${i + 1}/${v.replies.length} 완료: ${prev}`);
+    let replyId;
+    try {
+      replyId = await publish({ text: v.photoReply.text, image, replyTo: mainId });
+    } catch (e) {
+      if (!image) throw e;
+      console.log(`이미지 댓글 거부 — 텍스트로 재시도: ${e.message}`);
+      replyId = await publish({ text: v.photoReply.text, replyTo: mainId });
+      image = null;
     }
+    console.log(`사진 댓글 완료: ${replyId} (이미지 ${image ? "첨부" : "없음"})`);
   }
 } catch (e) {
   console.error("\n실패:", e.message);
