@@ -17,9 +17,10 @@ name: Threads 자동 게시
 # 스레드 API 한도: 게시물 250개/24h, 댓글 1,000개/24h.
 # 본문 96 + 댓글 288(96×3)이라 둘 다 한도 안이다.
 # 진짜 상한은 API가 아니라 사람이 질리는 속도이므로, 지표를 보고 조정한다.
+# ⚠️ 스케줄은 이제 Vercel Cron 이 담당한다 (vercel.json 의 crons — UTC 13시·23시,
+#    /api/social 호출). GitHub Actions 의 cron 이 disable→enable 후 재가동되지 않는
+#    버그로 스케줄이 죽어서 옮겼다. 이 워크플로는 수동 테스트(Run workflow)용으로만 남긴다.
 on:
-  schedule:
-    - cron: "*/15 * * * *"
   workflow_dispatch: # 수동 실행 버튼
     inputs:
       lang:
